@@ -1,0 +1,38 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @font-face {
+  font-family: "Rubik";
+  src: url("../fonts/Rubik/Rubik-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-size: normal;
+} */
+
+* {
+  font-family: "Rubik", Arial, Helvetica, sans-serif;
+}
+
+.input-default-np {
+  @apply bg-light border border-border rounded-md placeholder:text-secondary-text font-normal text-right w-full outline-none;
+}
+
+.toast-rtl {
+  direction: rtl;
+  text-align: right;
+  gap: 0.75rem;
+}
+.toast-rtl div {
+  margin: 0;
+}
+
+.input-default {
+  @apply py-2 px-3 bg-white-color border border-border rounded-md placeholder:text-secondary-text text-text outline-none;
+}
+.incident-label {
+  @apply text-secondary-text;
+}
+.incident-text {
+  @apply text-text font-medium;
+}

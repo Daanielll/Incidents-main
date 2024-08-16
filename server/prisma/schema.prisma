@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Incident {
+  id                 Int             @id @default(autoincrement())
+  title              String
+  description        String
+  technical_impact   TechnicalImpact
+  operational_impact String
+  monitored          Boolean         @default(false)
+  start_date         DateTime
+  end_date           DateTime?
+  status             IncidentStatus
+  opened_by          User?           @relation(name: "OpenedIncident", fields: [opened_by_id], references: [id], onDelete: SetNull)
+
+  platform    Platform
+  env         Env
+  site        Site
+  reported_by ReportedBy
+  omer_sent   Boolean    @default(false)
+  snow_ticket Int?
+
+  opened_by_id     Int?
+  IncidentApp      IncidentApp[]
+  IncidentImpact   IncidentImpact[]
+  IncidentActivity IncidentActivity[]
+}
+
+model User {
+  id               Int                @id
+  first_name       String
+  last_name        String
+  role             UserRole           @default(ANALYST)
+  password         String
+  IncidentsOpened  Incident[]         @relation("OpenedIncident")
+  IncidentActivity IncidentActivity[]
+}
+
+model App {
+  id                 Int              @id @default(autoincrement())
+  name               String
+  description        String?
+  operational_impact String?
+  env                Env?
+  main_site          Site?
+  recovery           Recovery?
+  platform           Platform?
+  IncidentApps       IncidentApp[]
+  ImpactedApps       IncidentImpact[]
+}
+
+model IncidentApp {
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  app        App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  incidentId Int
+  appId      Int
+
+  @@id([appId, incidentId])
+}
+
+model IncidentImpact {
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  app        App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+  incidentId Int
+  appId      Int
+
+  @@id([appId, incidentId])
+}
+
+model IncidentActivity {
+  id           Int      @id @default(autoincrement())
+  message      String
+  message_date DateTime @default(now())
+  sent_by      User     @relation(fields: [userId], references: [id])
+  incident     Incident @relation(fields: [incidentId], references: [id])
+  userId       Int
+  incidentId   Int
+}
+
+enum TechnicalImpact {
+  SHUTDOWN
+  PARTIAL_SHUTDOWN
+  FEATURE_SHUTDOWN
+  BACKUP_NONE
+  SLOW
+  JITTER
+  SLOW_SHUTDOWN
+  DATA_TRANSMISSION
+  NONE
+}
+
+enum IncidentStatus {
+  OPENED
+  ONGOING
+  RESOLVED
+  AWAITING_ANSWER
+}
+
+enum UserRole {
+  MANAGER
+  ANALYST
+}
+
+enum Platform {
+  OPENSHIFT
+  ORACLE
+  MAINFRAME
+}
+
+enum Site {
+  FIRST
+  SECOND
+  OTHER
+}
+
+enum Env {
+  BLACK
+  RED
+  YELLOW
+}
+
+enum ReportedBy {
+  CLIENT
+  MONITORED
+  KAPAT
+}
+
+enum Recovery {
+  AVAILABLE
+  DISABLED
+  NONE
+}
