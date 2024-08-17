@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuthContext } from "../hooks/useAuthContext";
+import { useAuthContext } from "../hooks/Auth/useAuthContext";
 
 type PrivateRouteProps = {
   children: React.ReactElement;
@@ -9,8 +9,7 @@ type PrivateRouteProps = {
  * access to the protected route if they are. If the user is not authenticated,
  * they are redirected to the login page.
  *
- * @param {Object} props - The props object.
- * @param {React.ReactElement} props.children - The children components.
+ * @param children - The children components.
  */
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   // Get the authentication state from the AuthContext

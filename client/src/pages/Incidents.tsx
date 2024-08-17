@@ -1,6 +1,7 @@
+import { useState } from "react";
 import IncidentsTable from "../components/Incidents/IncidentsTable";
 import { useIncidentData } from "../hooks/useIncidentData";
-import { Outlet } from "react-router-dom";
+import { Outlet, useSearchParams } from "react-router-dom";
 
 /**
  * Incidents component.
@@ -8,7 +9,12 @@ import { Outlet } from "react-router-dom";
  */
 
 export default function Incidents() {
-  const incidents = useIncidentData();
+  const [searchParams, setSearchParms] = useSearchParams();
+  const pagination = {
+    pageSize: Number(searchParams.get("size")) || 10,
+    pageIndex: Number(searchParams.get("page")) || 1,
+  };
+  const incidents = useIncidentData(pagination.pageSize, pagination.pageIndex);
   if (incidents.isLoading) return <h1>Loading</h1>;
   return (
     <>
@@ -20,7 +26,16 @@ export default function Incidents() {
               חדש +
             </button>
           </div>
-          <IncidentsTable data={incidents.data} />
+          <div className="flex-1 flex flex-col justify-between">
+            {incidents.data && (
+              <IncidentsTable
+                data={incidents.data.incidents}
+                rowCount={incidents.data.count}
+                pagination={pagination}
+              />
+            )}
+            <button>HHHH</button>
+          </div>
         </div>
       </div>
       <Outlet />

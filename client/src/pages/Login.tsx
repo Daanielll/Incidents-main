@@ -2,7 +2,7 @@ import { useState } from "react";
 import userIcon from "../assets/userIcon.svg";
 import lockIcon from "../assets/lockIcon.svg";
 import { Navigate } from "react-router-dom";
-import { useAuthContext } from "../hooks/useAuthContext";
+import { useAuthContext } from "../hooks/Auth/useAuthContext";
 /**
  * Login component.
  * Renders a login form and handles user login.
@@ -25,11 +25,7 @@ export function Login() {
     return <Navigate to="/" />;
   }
 
-  /**
-   * Handle form submission.
-   * Prevents default form behavior and calls the login function from the context.
-   * @param {React.FormEvent} e - The form submission event.
-   */
+  // Handle form submission. Calls the login function from the context
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login({ id: Number(id), password });

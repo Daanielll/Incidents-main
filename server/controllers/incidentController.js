@@ -5,24 +5,24 @@ const prisma = new PrismaClient();
 const createIncident = async (req, res) => {
   const userId = req.user.id;
   const { apps, impacted_apps, ...params } = req.body;
-  //   const {
-  //     title,
-  //     description,
-  //     technical_impact,
-  //     operational_impact,
-  //     monitored,
-  //     start_date,
-  //     end_date,
-  //     status,
-  //     platform,
-  //     env,
-  //     site,
-  //     reported_by,
-  //     omer_sent,
-  //     snow_ticket,
-  //     app,
-  //     impacted_apps,
-  //   } = req.body;
+  // const {
+  //   title,
+  //   description,
+  //   technical_impact,
+  //   operational_impact,
+  //   monitored,
+  //   start_date,
+  //   end_date,
+  //   status,
+  //   platform,
+  //   env,
+  //   site,
+  //   reported_by,
+  //   omer_sent,
+  //   snow_ticket,
+  //   app,
+  //   impacted_apps,
+  // } = req.body;
 
   if (
     !params.title ||
@@ -40,13 +40,13 @@ const createIncident = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { first_name: true, last_name: true },
+      select: { id: true },
     });
     if (!user) return res.status(400).json({ error: "משתמש לא קיים" });
 
     const result = await prisma.$transaction(async (tx) => {
       const incident = await tx.incident.create({
-        data: { ...params },
+        data: { ...params, opened_by_id: userId },
       });
       for (let appId of apps) {
         await tx.incidentApp.create({
@@ -78,6 +78,7 @@ const createIncident = async (req, res) => {
 };
 
 const getAllIncidents = async (req, res) => {
+  const { page = 1, limit = 10 } = req.query;
   try {
     const incidents = await prisma.incident.findMany({
       select: {
@@ -92,8 +93,11 @@ const getAllIncidents = async (req, res) => {
         title: true,
         id: true,
       },
+      skip: (Number(page) - 1) * Number(limit),
+      take: Number(limit),
     });
-    return res.status(201).json(incidents);
+    const count = await prisma.incident.count();
+    return res.status(201).json({ incidents, count });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal server error" });

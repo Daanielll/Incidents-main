@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-import { UserType } from "../types/UserType";
+import { UserType } from "../../types/UserType";
 export interface LoginCredentials {
   id: number;
   password: string;

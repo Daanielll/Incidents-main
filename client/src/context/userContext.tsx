@@ -1,8 +1,6 @@
 import { createContext } from "react";
-import { LoginCredentials, useUser } from "../hooks/useAuth";
+import { LoginCredentials, useUser } from "../hooks/Auth/useAuth";
 import { UserType } from "../types/UserType";
-
-// INTERFACE
 
 // UserContextType
 export interface UserContextType {
@@ -20,9 +18,8 @@ export const UserContext = createContext<UserContextType | undefined>(
  * UserContextProvider is a React component that provides the UserContext to its descendants.
  * It uses the useUser hook to get the user data and wraps it in the UserContext.
  *
- * @param {Object} props - The props object.
- * @param {React.ReactNode} props.children - The children components.
- * @return {JSX.Element} The UserContextProvider component.
+ * @param children - The children components.
+ * @return The UserContextProvider component.
  */
 export function UserContextProvider({
   children,
@@ -32,10 +29,6 @@ export function UserContextProvider({
   // Get the user data using the useUser hook
   const user = useUser();
 
-  /**
-   * The UserContextType object that is provided to the UserContext.
-   * @type {UserContextType}
-   */
   const contextValue: UserContextType = {
     // The user data
     user: user.user,

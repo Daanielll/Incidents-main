@@ -36,3 +36,6 @@
 .incident-text {
   @apply text-text font-medium;
 }
+.form-text-div {
+  @apply flex flex-col items-end gap-1 w-full;
+}
