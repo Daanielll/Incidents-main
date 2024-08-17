@@ -9,7 +9,7 @@ router
   .post(authToken, appController.createApp);
 
 router
-  .route("/:appId")
+  .route("/:id")
   .patch(authToken, appController.updateApp)
   .delete(authToken, appController.deleteApp);
 

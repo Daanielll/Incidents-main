@@ -4,35 +4,33 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useNavigate } from "react-router-dom";
-import { StatusEnum } from "../../types/IncidentType";
+import { ImpactEnum, IncidentType, StatusEnum } from "../../types/IncidentType";
 
 /**
  * Renders a table with all the incidents.
  *
- * @param {Object} data - The data object (the data that is being used in the table).
+ * @param data - The data object (the data that is being used in the table).
  */
 
-export default function IncidentsTable({ data }: { data: any }) {
+export default function IncidentsTable({
+  data,
+  rowCount,
+  pagination,
+}: {
+  data: IncidentType[];
+  rowCount: number;
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+  };
+}) {
   const statusColor = {
     green: "bg-secondary-green text-secondary-green",
     yellow: "bg-secondary-yellow text-secondary-yellow",
     red: "bg-secondary-red text-secondary-red",
   };
   const navigate = useNavigate();
-  const months = [
-    "ינו'",
-    "פבר'",
-    "מרץ",
-    "אפר'",
-    "מאי",
-    "יוני",
-    "יולי",
-    "אוג'",
-    "ספט'",
-    "אוק'",
-    "נוב'",
-    "דמצ'",
-  ];
+  // Months mapping, to display it in hebrew
   const columns = [
     {
       accessorKey: "status",
@@ -49,7 +47,7 @@ export default function IncidentsTable({ data }: { data: any }) {
                   : statusColor.yellow
               } bg-opacity-15 rounded-md px-2 py-1 h-fit w-fit mx-auto`}
             >
-              {StatusEnum[props.getValue()]}
+              {StatusEnum[props.getValue() as keyof typeof StatusEnum]}
             </h1>
           </div>
         );
@@ -59,11 +57,17 @@ export default function IncidentsTable({ data }: { data: any }) {
       accessorKey: "end_date",
       header: "זיכוי אירוע",
       cell: (props: any) => {
+        if (!props.getValue())
+          return <p className="text-secondary-text">בתהליך</p>;
         const date = new Date(props.getValue());
         return (
-          <h1 dir="rtl">{`${date.getDate()} ב${
-            months[date.getMonth() + 1]
-          }`}</h1>
+          <h1 dir="rtl">
+            {date.toLocaleDateString("he-IL", {
+              day: "numeric",
+              month: "short",
+              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+            })}
+          </h1>
         );
       },
     },
@@ -73,9 +77,13 @@ export default function IncidentsTable({ data }: { data: any }) {
       cell: (props: any) => {
         const date = new Date(props.getValue());
         return (
-          <h1 dir="rtl">{`${date.getDate()} ב${
-            months[date.getMonth() + 1]
-          }`}</h1>
+          <h1 dir="rtl">
+            {date.toLocaleDateString("he-IL", {
+              day: "numeric",
+              month: "short",
+              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+            })}
+          </h1>
         );
       },
     },
@@ -117,7 +125,7 @@ export default function IncidentsTable({ data }: { data: any }) {
       accessorKey: "technical_impact",
       header: "משמעות טכנית",
       cell: (props: any) => {
-        return props.getValue() == "SHUTDOWN" ? "השבתה" : "";
+        return ImpactEnum[props.getValue() as keyof typeof ImpactEnum];
       },
     },
     {
@@ -130,6 +138,12 @@ export default function IncidentsTable({ data }: { data: any }) {
     columns,
     data,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    rowCount,
+    state: {
+      pagination,
+    },
+    autoResetPageIndex: true,
   });
   return (
     <table className="w-full text-text">
@@ -159,6 +173,9 @@ export default function IncidentsTable({ data }: { data: any }) {
           </tr>
         ))}
       </tbody>
+      <tfoot>
+        <button onClick={() => table.nextPage()}>Next</button>
+      </tfoot>
     </table>
   );
 }

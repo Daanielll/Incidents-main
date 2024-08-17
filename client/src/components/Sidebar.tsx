@@ -1,27 +1,31 @@
 import { useState } from "react";
-import { useAuthContext } from "../hooks/useAuthContext";
+import { useAuthContext } from "../hooks/Auth/useAuthContext";
 import { NavLink } from "react-router-dom";
 import { IncidentIcon } from "../assets/IncidentIcon";
+import { ManageAppsIcon } from "../assets/ManageAppsIcon";
 
 /**
  * Sidebar component.
- * Renders a sidebar with the logo, a menu with one section for the analysts, and user information.
+ * Renders a sidebar with the logo, a menu with one section for the analysts and one section for the manager, and user information.
  */
 export function Sidebar() {
   // State to control the sidebar's expand/collapse state
   const [isExpanded, setIsExpanded] = useState(false);
   // Get the user object from the auth context
   const { user } = useAuthContext();
-  // Define the menu items for the analysts section
+  // Menu items for the analysts section
   const analysts = [
     {
       title: "יומן מבצעים",
       icon: <IncidentIcon />,
       link: "/incidents",
     },
+  ];
+  // Menu items for the manager section
+  const manager = [
     {
       title: "ניהול מערכות",
-      icon: <IncidentIcon />,
+      icon: <ManageAppsIcon />,
       link: "/manage-apps",
     },
   ];
@@ -79,6 +83,33 @@ export function Sidebar() {
               {item.icon}
             </NavLink>
           ))}
+          {/* MANAGER Items */}
+          {user.role === "MANAGER" && (
+            <>
+              <div className="h-5 self-end flex items-center">
+                {isExpanded && (
+                  <h3 className="text-sm font-medium text-secondary-text">
+                    שירה
+                  </h3>
+                )}
+                {!isExpanded && <div className="h-[2px] w-5 bg-border"></div>}
+              </div>
+              {manager.map((item) => (
+                <NavLink
+                  to={item.link}
+                  key={item.title}
+                  className={({ isActive }) =>
+                    `${
+                      isActive ? "text-text" : ""
+                    } flex gap-2 justify-end text-secondary-text items-cente hover:text-text cursor-pointer h-6`
+                  }
+                >
+                  {isExpanded && <h2>{item.title}</h2>}
+                  {item.icon}
+                </NavLink>
+              ))}
+            </>
+          )}
         </div>
         {/* User Info */}
         <div

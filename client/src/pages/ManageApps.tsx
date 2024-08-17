@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useAllApps } from "../hooks/useAllApps";
-//import { ManageAppsForm } from "../components/ManageAppsForm";
 import { AnimatePresence } from "framer-motion";
+import { ManageAppsForm } from "../components/ManageAppsForm";
+import { useAllApps } from "../hooks/Apps/useAllApps";
 
 /**
  * ManageApps component for managing apps.
- * It renders a list of apps and a form for creating / editing apps.
- * @returns JSX.Element
+ * It renders a list of apps and a form for creating / editing / deleting apps.
  */
 export function ManageApps() {
   // Fetch all apps data from the server
@@ -26,7 +25,7 @@ export function ManageApps() {
   return (
     <div className="flex flex-col text-text gap-3 items-end h-full">
       {/* Animate the form opening and closing */}
-      {/* <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="wait" initial={false}>
         {formOpen !== -2 && (
           <ManageAppsForm
             // If the form is for creating a new app, initialize the app object with default values
@@ -38,7 +37,7 @@ export function ManageApps() {
             }}
           />
         )}
-      </AnimatePresence> */}
+      </AnimatePresence>
 
       <h1 className="font-medium text-3xl mb-6">ניהול מערכות</h1>
       <div className="flex flex-row-reverse child:py-2 gap-3">

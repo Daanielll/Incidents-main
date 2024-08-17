@@ -30,7 +30,7 @@ model Incident {
   site        Site
   reported_by ReportedBy
   omer_sent   Boolean    @default(false)
-  snow_ticket Int?
+  snow_ticket String?
 
   opened_by_id     Int?
   IncidentApp      IncidentApp[]
