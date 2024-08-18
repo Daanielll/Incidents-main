@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import IncidentsTable from "../components/Incidents/IncidentsTable";
 import { useIncidentData } from "../hooks/useIncidentData";
 import { Outlet, useSearchParams } from "react-router-dom";
 import ManageIncidentForm from "../components/Incidents/ManageIncidentForm";
 import { AnimatePresence } from "framer-motion";
 import { useAllApps } from "../hooks/Apps/useAllApps";
+import { ImpactEnum, StatusEnum } from "../types/IncidentType";
+import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 /**
  * Incidents component.
@@ -13,14 +15,140 @@ import { useAllApps } from "../hooks/Apps/useAllApps";
 
 export default function Incidents() {
   const [searchParams, setSearchParms] = useSearchParams();
-  const pagination = {
-    pageSize: Number(searchParams.get("size")) || 10,
+  const [pagination, setPagination] = useState({
+    pageSize: Number(searchParams.get("limit")) || 10,
     pageIndex: Number(searchParams.get("page")) || 1,
-  };
+  });
+  useEffect(() => {
+    setSearchParms({
+      limit: pagination.pageSize.toString(),
+      page: pagination.pageIndex.toString(),
+    });
+  }, [pagination]);
+
   const incidents = useIncidentData(pagination.pageSize, pagination.pageIndex);
   const [showForm, setShowForm] = useState(false);
   const apps = useAllApps();
-  if (apps.isLoading || incidents.isLoading) return <h1>Loading</h1>;
+  const statusColor = {
+    green: "bg-secondary-green text-secondary-green",
+    yellow: "bg-secondary-yellow text-secondary-yellow",
+    red: "bg-secondary-red text-secondary-red",
+  };
+  const columns = [
+    {
+      accessorKey: "status",
+      header: "סטטוס",
+      cell: (props: any) => {
+        return (
+          <div>
+            <h1
+              className={`${
+                props.getValue() === "ONGOING"
+                  ? statusColor.red
+                  : props.getValue() === "RESOLVED"
+                  ? statusColor.green
+                  : statusColor.yellow
+              } bg-opacity-15 rounded-md px-2 py-1 h-fit w-fit mx-auto`}
+            >
+              {StatusEnum[props.getValue() as keyof typeof StatusEnum]}
+            </h1>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "end_date",
+      header: "זיכוי אירוע",
+      cell: (props: any) => {
+        if (!props.getValue())
+          return <p className="text-secondary-text">בתהליך</p>;
+        const date = new Date(props.getValue());
+        return (
+          <h1 dir="rtl">
+            {date.toLocaleDateString("he-IL", {
+              day: "numeric",
+              month: "short",
+              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+            })}
+          </h1>
+        );
+      },
+    },
+    {
+      accessorKey: "start_date",
+      header: "תחילת אירוע",
+      cell: (props: any) => {
+        const date = new Date(props.getValue());
+        return (
+          <h1 dir="rtl">
+            {date.toLocaleDateString("he-IL", {
+              day: "numeric",
+              month: "short",
+              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+            })}
+          </h1>
+        );
+      },
+    },
+
+    {
+      accessorKey: "IncidentImpact",
+      cell: (props: any) => {
+        if (props.getValue().length < 1) return <p>אין</p>;
+        return (
+          <div className="flex gap-2 w-full justify-center">
+            {props.getValue().map((app: any) => (
+              <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
+                {app.app.name}
+              </h1>
+            ))}
+          </div>
+        );
+      },
+      header: "מערכות מושפעות",
+    },
+    {
+      accessorKey: "IncidentApp",
+      cell: (props: any) => (
+        <div className="flex gap-2 w-full justify-center">
+          {props.getValue().map((app: any) => (
+            <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
+              {app.app.name}
+            </h1>
+          ))}
+        </div>
+      ),
+      header: "מערכות",
+    },
+    {
+      accessorKey: "operational_impact",
+      header: "משמעות מבצעית",
+    },
+    {
+      accessorKey: "technical_impact",
+      header: "משמעות טכנית",
+      cell: (props: any) => {
+        return ImpactEnum[props.getValue() as keyof typeof ImpactEnum];
+      },
+    },
+    {
+      accessorKey: "title",
+      header: "שם אירוע",
+    },
+  ];
+
+  const table = useReactTable({
+    columns,
+    data: incidents.data?.incidents || [],
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    rowCount: incidents.data?.count,
+    state: {
+      pagination,
+    },
+    onPaginationChange: setPagination,
+  });
+  // if (apps.isLoading || incidents.isLoading) return <h1>Loading</h1>;
   return (
     <>
       <div className="flex flex-col gap-3 w-full min-h-full items-end text-text">
@@ -35,18 +163,71 @@ export default function Incidents() {
             </button>
           </div>
           <div className="flex-1 flex flex-col justify-between">
-            {incidents.data && (
-              <IncidentsTable
-                data={incidents.data.incidents}
-                rowCount={incidents.data.count}
-                pagination={pagination}
-              />
-            )}
+            <div className="flex-1">
+              {incidents.data && (
+                <IncidentsTable
+                  table={table}
+                  data={incidents.data.incidents || []}
+                />
+              )}
+            </div>
+
+            <div className="flex w-full justify-between flex-row-reverse px-5 mt-8">
+              <div dir="rtl" className="flex gap-2 items-end">
+                <h5>מציג</h5>
+                <select
+                  className="bg-light p-1"
+                  value={table.getState().pagination.pageSize}
+                  onChange={(e) => {
+                    setPagination({ ...pagination, pageIndex: 0 });
+                    table.setPageSize(Number(e.target.value));
+                  }}
+                >
+                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                    <option key={pageSize} value={pageSize}>
+                      {pageSize}
+                    </option>
+                  ))}
+                </select>
+                <h5>אירועים בעמוד</h5>
+              </div>
+              <div className="child:size-6 child:rounded-sm text-sm child:bg-light flex gap-2 child:flex child:items-center child:justify-center ">
+                <button
+                  disabled={!table.getCanPreviousPage()}
+                  onClick={() => table.previousPage()}
+                >
+                  {"<"}
+                </button>
+                {table.getCanPreviousPage() && (
+                  <button onClick={() => table.firstPage()}>1</button>
+                )}
+                {!table.getCanNextPage() && <button disabled>...</button>}
+
+                <button className="border border-secondary-text box-border">
+                  {table.getState().pagination.pageIndex + 1}
+                </button>
+                {table.getCanNextPage() && (
+                  <>
+                    <button disabled>...</button>
+                    <button onClick={() => table.lastPage()}>
+                      {table.getPageCount()}
+                    </button>
+                  </>
+                )}
+
+                <button
+                  disabled={!table.getCanNextPage()}
+                  onClick={() => table.nextPage()}
+                >
+                  {">"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      {showForm && (
-        <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait">
+        {showForm && (
           <ManageIncidentForm
             handleClose={(e) => {
               e.preventDefault();
@@ -70,8 +251,9 @@ export default function Incidents() {
             }}
             apps={apps.data!}
           />
-        </AnimatePresence>
-      )}
+        )}{" "}
+      </AnimatePresence>
+
       <Outlet />
     </>
   );

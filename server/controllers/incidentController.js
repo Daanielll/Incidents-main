@@ -61,7 +61,7 @@ const createIncident = async (req, res) => {
 };
 
 const getAllIncidents = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 0, limit = 10 } = req.query;
   try {
     const incidents = await prisma.incident.findMany({
       select: {
@@ -76,7 +76,7 @@ const getAllIncidents = async (req, res) => {
         title: true,
         id: true,
       },
-      skip: (Number(page) - 1) * Number(limit),
+      skip: Number(page) * Number(limit),
       take: Number(limit),
     });
     const count = await prisma.incident.count();

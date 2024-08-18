@@ -84,9 +84,9 @@ model IncidentActivity {
   id           Int      @id @default(autoincrement())
   message      String
   message_date DateTime @default(now())
-  sent_by      User     @relation(fields: [userId], references: [id])
-  incident     Incident @relation(fields: [incidentId], references: [id])
-  userId       Int
+  sent_by      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  incident     Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  userId       Int?
   incidentId   Int
 }
 

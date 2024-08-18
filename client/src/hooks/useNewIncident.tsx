@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { IncidentType } from "../types/IncidentType";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 

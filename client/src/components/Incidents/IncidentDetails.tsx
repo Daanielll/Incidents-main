@@ -208,7 +208,7 @@ export default function IncidentDetails() {
                   {data.IncidentActivity!.map((inc) => {
                     const messageDate = new Date(inc.message_date);
                     return (
-                      <div key={inc.message_date}>
+                      <div className="w-full" key={inc.message_date}>
                         <div className="flex flex-row-reverse gap-2 items-center">
                           <div className="child:text-sm min-w-6 size-6 bg-secondary-yellow rounded-full flex child:text-white-color items-center justify-center">
                             <span>
@@ -238,7 +238,7 @@ export default function IncidentDetails() {
                           </div>
                         </div>
                         <p
-                          className="border-r-2 border-border m-3 px-3 whitespace-normal"
+                          className="border-r-2 border-border m-3 px-3 whitespace-normal break-words overflow-x-hidden"
                           dir="rtl"
                         >
                           {inc.message}
