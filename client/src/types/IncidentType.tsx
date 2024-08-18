@@ -45,8 +45,8 @@ export interface IncidentType {
   technical_impact: keyof typeof ImpactEnum;
   operational_impact: string;
   monitored: boolean;
-  start_date: Date;
-  end_date?: Date;
+  start_date: string;
+  end_date?: string;
   status: keyof typeof StatusEnum;
   opened_by: { first_name: string; last_name: string };
   IncidentApp: { app: AppType }[];
@@ -64,4 +64,5 @@ export interface IncidentType {
   reported_by: keyof typeof ReporterEnum;
   site: keyof typeof SiteEnum;
   snow_ticket?: string;
+  jira_ticket?: string;
 }

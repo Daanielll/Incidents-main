@@ -111,7 +111,7 @@ const getIncidentById = async (req, res) => {
     const incident = await prisma.incident.findUnique({
       where: { id: incId },
       include: {
-        IncidentApp: { select: { app: true } },
+        IncidentApp: { select: { app: true, appId: true } },
         IncidentImpact: { select: { app: true } },
         opened_by: { select: { first_name: true, last_name: true } },
         IncidentActivity: {

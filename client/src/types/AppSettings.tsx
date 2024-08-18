@@ -22,5 +22,30 @@ const paltformSettings = [
   { value: "OPENSHIFT", name: "Openshift" },
   { value: "MAINFRAME", name: "Mainframe" },
 ];
+const reporterSettings = [
+  { value: null, name: "בחר מדווח" },
+  { value: "CLIENT", name: "לקוח" },
+  { value: "MONITORED", name: "ניטור" },
+  { value: "KAPAT", name: 'קפ"ט' },
+];
+const impactSettings = [
+  { value: null, name: "בחר משמעות טכנית" },
+  { value: "SHUTDOWN", name: "השבתה" },
+  { value: "PARTIAL_SHUTDOWN", name: "השבתה חלקית" },
+  { value: "FEATURE_SHUTDOWN", name: "השבתת יכולת" },
+  { value: "BACKUP_NONE", name: "ירידה משרידות" },
+  { value: "SLOW", name: "איטיות" },
+  { value: "SLOW_SHUTDOWN", name: "איטיות עד כדי השבתה" },
+  { value: "JITTER", name: "ריצודים" },
+  { value: "DATA_TRANSMISSION", name: "פער בתעבורת מידע" },
+  { value: "NONE", name: "אין" },
+];
 
-export { siteSettings, recoverySettings, envSettings, paltformSettings };
+export {
+  siteSettings,
+  recoverySettings,
+  envSettings,
+  paltformSettings,
+  reporterSettings,
+  impactSettings,
+};

@@ -39,3 +39,6 @@
 .form-text-div {
   @apply flex flex-col items-end gap-1 w-full;
 }
+.form-row {
+  @apply flex w-full flex-row-reverse items-end gap-3;
+}

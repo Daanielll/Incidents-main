@@ -173,9 +173,6 @@ export default function IncidentsTable({
           </tr>
         ))}
       </tbody>
-      <tfoot>
-        <button onClick={() => table.nextPage()}>Next</button>
-      </tfoot>
     </table>
   );
 }
