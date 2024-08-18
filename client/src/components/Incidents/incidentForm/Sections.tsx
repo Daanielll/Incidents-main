@@ -1,6 +1,7 @@
 import { AppType } from "../../../types/AppType";
 import { Dropdown } from "../../Dropdown";
 import chevronDown from "../../../assets/chevronDownIcon.svg";
+import { useState } from "react";
 export function LabelButton({
   label,
   setOpenDropDown,
@@ -58,49 +59,74 @@ export function LabelApps({
   apps,
   value,
   setValue,
+  visible,
+  setVisible,
 }: {
   label: string;
   apps: AppType[];
-  value: { app: AppType }[];
-  setValue: (e) => void;
+  value: AppType[];
+  setValue: (e: any) => void;
+  visible: boolean;
+  setVisible: (e: any) => void;
 }) {
+  const [search, setSearch] = useState("");
   return (
     <div className="flex flex-col items-end gap-1 flex-1">
       <h4 className="font-medium text-sm mr-1">{label}</h4>
-      <div
-        dir="rtl"
-        className="flex gap-2 input-default cursor-pointer w-full relative pl-2"
-      >
-        <button type="button">
-          <img src={chevronDown} alt="" />
-        </button>
-        <div className="h-6 flex gap-2 w-0">
-          {value.map((v) => (
-            <p className="px-1 bg-light rounded-md whitespace-nowrap">
-              {v.app.name}
-            </p>
-          ))}
-        </div>
-        <div className="absolute top-12 left-0 flex flex-col gap-2 w-full p-2 items-end bg-white border border-border rounded-md overflow-hidden z-50">
-          <div className="w-full">
-            <input
-              dir="rtl"
-              className="p-2 border border-border rounded-md w-full outline-none"
-              type="text"
+      <div dir="rtl" className="w-full relative">
+        <div
+          className="w-full gap-2 input-default cursor-pointer pl-2 flex text-ellipsis overflow-hidden"
+          onClick={() => setVisible(!visible)}
+        >
+          <button type="button">
+            <img
+              className={`${
+                visible ? "rotate-180" : "rotate-0"
+              } transition-all`}
+              src={chevronDown}
+              alt=""
             />
-          </div>
-          <div className="w-full flex gap-1 justify-end max-h-64 flex-wrap">
-            {apps.map((app) => (
-              <button
-                onClick={() => setValue(app)}
-                type="button"
-                className="bg-light rounded-md p-2 text-right hover:bg-light cursor-pointer h-fit"
-              >
-                {app.name}
-              </button>
-            ))}
+          </button>
+          <div className="h-6 flex gap-2 w-0 flex-1">
+            <div className="flex gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
+              {value.map((v, index) => (
+                <p key={index} className="px-1 bg-light rounded-md">
+                  {v.name}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
+        {visible && (
+          <div className="absolute top-12 left-0 flex flex-col gap-2 w-full p-2 items-end bg-white border border-border rounded-md overflow-hidden z-50 shadow-sm">
+            <div className="w-full">
+              <input
+                dir="rtl"
+                className="p-2 border border-border rounded-md w-full outline-none"
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            <div className="w-full flex gap-1 justify-start max-h-64 overflow-auto flex-wrap">
+              {apps
+                .filter((app) => app.name.includes(search))
+                .map((app) => (
+                  <button
+                    onClick={() => setValue(app)}
+                    type="button"
+                    className={`${
+                      value.includes(app)
+                        ? "border-secondary-text"
+                        : "border-border"
+                    } rounded-md bg-light hover:bg-border p-2 text-right hover:brightness-90 cursor-pointer h-fit border box-border`}
+                  >
+                    {app.name}
+                  </button>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -115,7 +141,7 @@ export function LabelText({
   label: string;
   placeholder: string;
   value: string;
-  setValue: (e) => void;
+  setValue: (e: any) => void;
 }) {
   return (
     <div className="form-text-div flex-1">

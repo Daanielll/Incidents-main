@@ -3,7 +3,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ImpactEnum, IncidentType, StatusEnum } from "../../types/IncidentType";
 
 /**
@@ -30,6 +30,7 @@ export default function IncidentsTable({
     red: "bg-secondary-red text-secondary-red",
   };
   const navigate = useNavigate();
+  const location = useLocation();
   // Months mapping, to display it in hebrew
   const columns = [
     {
@@ -143,7 +144,6 @@ export default function IncidentsTable({
     state: {
       pagination,
     },
-    autoResetPageIndex: true,
   });
   return (
     <table className="w-full text-text">
@@ -159,7 +159,12 @@ export default function IncidentsTable({
       <tbody>
         {table.getCoreRowModel().rows.map((row: any) => (
           <tr
-            onClick={() => navigate(`/incidents/${data[row.id].id}`)}
+            onClick={() => {
+              const queryParams = new URLSearchParams(location.search);
+              navigate(
+                `/incidents/${data[row.id].id}?${queryParams.toString()}`
+              );
+            }}
             key={row.id}
           >
             {row.getVisibleCells().map((cell: any) => (

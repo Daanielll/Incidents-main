@@ -4,12 +4,7 @@ import chevronDown from "../assets/chevronDownIcon.svg";
 import { useState } from "react";
 import { Dropdown } from "./Dropdown";
 import trashIcon from "../assets/trashIcon.svg";
-import {
-  envSettings,
-  paltformSettings,
-  recoverySettings,
-  siteSettings,
-} from "../types/AppSettings";
+import settings from "../types/AppSettings";
 
 import { ConfirmationModal } from "./ConfirmationModal";
 import { AppType } from "../types/AppType";
@@ -163,10 +158,10 @@ export function ManageAppsForm({
                   />
                 </button>
                 <h1 className="h-6">
-                  {envSettings.find((e) => e.value == env)?.name}
+                  {settings.envSettings.find((e) => e.value == env)?.name}
                 </h1>
                 {openDropDown == "env" && (
-                  <Dropdown setValue={setEnv} data={envSettings} />
+                  <Dropdown setValue={setEnv} data={settings.envSettings} />
                 )}
               </div>
             </div>
@@ -204,7 +199,7 @@ export function ManageAppsForm({
           {/* Platform dropdown */}
           <LabelButton
             label="פלטפורמה"
-            values={paltformSettings}
+            values={settings.paltformSettings}
             type={platform}
             setType={setPlatform}
             openDropDown={openDropDown}
@@ -214,7 +209,7 @@ export function ManageAppsForm({
           {/* Site dropdown */}
           <LabelButton
             label="אתר ראשי"
-            values={siteSettings}
+            values={settings.siteSettings}
             type={mainSite}
             setType={setMainSite}
             openDropDown={openDropDown}
@@ -224,7 +219,7 @@ export function ManageAppsForm({
           {/* Recovery dropdown */}
           <LabelButton
             label="שרידות"
-            values={recoverySettings}
+            values={settings.recoverySettings}
             setType={setRecovery}
             openDropDown={openDropDown}
             setOpenDropDown={setOpenDropDown}

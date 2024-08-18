@@ -52,6 +52,22 @@ export default function Incidents() {
               e.preventDefault();
               setShowForm(false);
             }}
+            incident={{
+              description: "",
+              title: "",
+              operational_impact: "",
+              env: null,
+              site: null,
+              platform: null,
+              IncidentImpact: [],
+              IncidentApp: [],
+              status: null,
+              reported_by: null,
+              omer_sent: false,
+              monitored: false,
+              technical_impact: null,
+              start_date: "",
+            }}
             apps={apps.data!}
           />
         </AnimatePresence>

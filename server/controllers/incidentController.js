@@ -5,24 +5,6 @@ const prisma = new PrismaClient();
 const createIncident = async (req, res) => {
   const userId = req.user.id;
   const { apps, impacted_apps, ...params } = req.body;
-  // const {
-  //   title,
-  //   description,
-  //   technical_impact,
-  //   operational_impact,
-  //   monitored,
-  //   start_date,
-  //   end_date,
-  //   status,
-  //   platform,
-  //   env,
-  //   site,
-  //   reported_by,
-  //   omer_sent,
-  //   snow_ticket,
-  //   app,
-  //   impacted_apps,
-  // } = req.body;
 
   if (
     !params.title ||
@@ -33,7 +15,8 @@ const createIncident = async (req, res) => {
     !params.env ||
     !params.site ||
     !params.reported_by ||
-    !apps
+    !apps ||
+    apps.length === 0
   )
     return res.status(400).json({ error: "שדות חובה חסרים" });
 
@@ -160,9 +143,21 @@ const createIncidentComment = async (req, res) => {
   }
 };
 
+const deleteIncident = async (req, res) => {
+  const incId = Number(req.params.incId);
+  if (!incId) return res.status(400).json({ error: "שדות חובה חסרים" });
+  try {
+    const result = await prisma.incident.delete({ where: { id: incId } });
+    return res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 module.exports = {
   createIncident,
   getAllIncidents,
   getIncidentById,
   createIncidentComment,
+  deleteIncident,
 };

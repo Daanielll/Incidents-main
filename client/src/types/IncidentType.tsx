@@ -42,27 +42,27 @@ export enum ImpactEnum {
 export interface IncidentType {
   title: string;
   description: string;
-  technical_impact: keyof typeof ImpactEnum;
+  technical_impact: keyof typeof ImpactEnum | null;
   operational_impact: string;
   monitored: boolean;
   start_date: string;
   end_date?: string;
-  status: keyof typeof StatusEnum;
-  opened_by: { first_name: string; last_name: string };
+  status: keyof typeof StatusEnum | null;
+  opened_by?: { first_name: string; last_name: string };
   IncidentApp: { app: AppType }[];
   IncidentImpact: { app: AppType }[];
-  IncidentActivity: {
+  IncidentActivity?: {
     message: string;
     message_date: string;
     sent_by: { first_name: string; last_name: string };
   }[];
-  env: keyof typeof envEnum;
-  id: number;
-  omer_sent: false;
+  env: keyof typeof envEnum | null;
+  id?: number;
+  omer_sent: boolean;
   opened_by_id?: number;
-  platform: keyof typeof PlatformEnum;
-  reported_by: keyof typeof ReporterEnum;
-  site: keyof typeof SiteEnum;
+  platform: keyof typeof PlatformEnum | null;
+  reported_by: keyof typeof ReporterEnum | null;
+  site: keyof typeof SiteEnum | null;
   snow_ticket?: string;
   jira_ticket?: string;
 }
