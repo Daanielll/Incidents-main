@@ -40,12 +40,19 @@ const impactSettings = [
   { value: "DATA_TRANSMISSION", name: "פער בתעבורת מידע" },
   { value: "NONE", name: "אין" },
 ];
+const statusSettings = [
+  { value: null, name: "בחר סטטוס" },
+  { value: "RESOLVED", name: "טופל" },
+  { value: "AWAITING_ANSWER", name: "מחכה לתשובה" },
+  { value: "ONGOING", name: "בטיפול" },
+];
 
-export {
+export default {
   siteSettings,
   recoverySettings,
   envSettings,
   paltformSettings,
   reporterSettings,
   impactSettings,
+  statusSettings,
 };

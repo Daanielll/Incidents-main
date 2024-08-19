@@ -6,6 +6,7 @@ import {
   PlatformEnum,
   ReporterEnum,
   SiteEnum,
+  StatusEnum,
 } from "../../types/IncidentType";
 import { ConfirmationModal } from "../ConfirmationModal";
 import { motion } from "framer-motion";
@@ -13,13 +14,7 @@ import { Backdrop } from "../Backdrop";
 import crossIcon from "../../assets/crossIcon.svg";
 import trashIcon from "../../assets/trashIcon.svg";
 import { useState } from "react";
-import {
-  envSettings,
-  impactSettings,
-  paltformSettings,
-  reporterSettings,
-  siteSettings,
-} from "../../types/AppSettings";
+import settings from "../../types/AppSettings";
 import { AppType } from "../../types/AppType";
 import {
   LabelApps,
@@ -27,10 +22,12 @@ import {
   LabelInput,
   LabelText,
 } from "./incidentForm/Sections";
+import { useNewIncident } from "../../hooks/useNewIncident";
+import { toast } from "sonner";
 
 type Props = {
   handleClose: (e: React.MouseEvent) => void;
-  incident?: IncidentType;
+  incident: IncidentType;
   apps: AppType[];
 };
 
@@ -39,27 +36,81 @@ export default function ManageIncidentForm({
   incident,
   apps,
 }: Props) {
-  const [formData, setFormData] = useState({
-    title: incident?.title || "",
-    description: incident?.description || "",
-    technicalImpact: incident?.technical_impact || null,
-    operationalImpact: incident?.operational_impact || "",
-    apps: incident?.IncidentApp || [],
-    impactedApps: incident?.IncidentImpact || [],
-    monitored: incident?.monitored || false,
-    startDate: incident?.start_date || null,
-    endDate: incident?.end_date || null,
-    platform: incident?.platform || null,
-    env: incident?.env || null,
-    site: incident?.site || null,
-    reportedBy: incident?.reported_by || null,
-    omerSent: incident?.omer_sent || false,
-    snowTicket: incident?.snow_ticket || null,
-    jiraTicket: incident?.jira_ticket || null,
-  });
-  const selectedApps = [];
-  formData.apps.map((app) => selectedApps.push(app.app.id));
+  const newIncident = useNewIncident();
+  const [formData, setFormData] = useState(incident);
+  const [selectedApps, setSelectedApps] = useState<{
+    apps: number[];
+    visible: boolean;
+  }>({ apps: [], visible: false });
+  formData.IncidentApp.map((app) =>
+    setSelectedApps({
+      ...selectedApps,
+      apps: [...selectedApps.apps, app.app.id!],
+    })
+  );
+
+  const [selectedImpacted, setSelectedImpacted] = useState<{
+    apps: number[];
+    visible: boolean;
+  }>({ apps: [], visible: false });
+  formData.IncidentImpact.map((app) =>
+    setSelectedImpacted({
+      ...selectedImpacted,
+      apps: [...selectedImpacted.apps, app.app.id!],
+    })
+  );
   const [openDropdown, setOpenDropDown] = useState<string | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const {
+      IncidentApp,
+      IncidentImpact,
+      start_date,
+      end_date,
+      description,
+      operational_impact,
+      ...data
+    } = formData;
+    console.log({
+      ...data,
+      apps: selectedApps.apps,
+      impacted_apps: selectedImpacted.apps,
+    });
+    const inc = {
+      ...data,
+      ...{ start_date: new Date(start_date) },
+      ...(end_date && { end_date: new Date(end_date) }),
+      ...{ apps: selectedApps.apps },
+      ...{ impacted_apps: selectedImpacted.apps },
+      ...(description.trim() !== "" && { description: description }),
+      ...(operational_impact.trim() !== "" && {
+        operational_impact: operational_impact,
+      }),
+    };
+    if (
+      inc.apps[0] &&
+      inc.title &&
+      inc.description &&
+      inc.start_date &&
+      inc.platform &&
+      inc.operational_impact &&
+      inc.platform &&
+      inc.reported_by &&
+      inc.site &&
+      inc.status &&
+      inc.technical_impact &&
+      inc.env
+    ) {
+      newIncident(inc);
+      handleClose(e);
+    } else
+      toast.error("שדות חובה חסרים", {
+        position: "top-center",
+        richColors: true,
+        className: "toast-rtl",
+      });
+  };
   return (
     <Backdrop onClick={() => {}}>
       <motion.div
@@ -94,7 +145,10 @@ export default function ManageIncidentForm({
 
         {/* form */}
 
-        <form className="flex flex-col gap-5 px-6 py-4 w-full">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-5 px-6 py-4 w-full"
+        >
           <div className="flex flex-row-reverse gap-5 w-full items-start">
             {/* Right column */}
             <div className="flex flex-1 flex-col gap-3">
@@ -116,18 +170,18 @@ export default function ManageIncidentForm({
               />
               <LabelButton
                 label="* מקור דיווח"
-                values={reporterSettings}
+                values={settings.reporterSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
-                type={formData.reportedBy}
+                type={formData.reported_by}
                 setType={(value: keyof typeof ReporterEnum) => {
-                  setFormData({ ...formData, reportedBy: value });
+                  setFormData({ ...formData, reported_by: value });
                 }}
                 dropDownValue="reporter"
               />
               <LabelButton
                 label="תשתית"
-                values={paltformSettings}
+                values={settings.paltformSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
                 type={formData.platform}
@@ -138,7 +192,7 @@ export default function ManageIncidentForm({
               />
               <LabelButton
                 label="סביבה"
-                values={envSettings}
+                values={settings.envSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
                 type={formData.env}
@@ -149,7 +203,7 @@ export default function ManageIncidentForm({
               />
               <LabelButton
                 label="אתר"
-                values={siteSettings}
+                values={settings.siteSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
                 type={formData.site}
@@ -161,9 +215,9 @@ export default function ManageIncidentForm({
               <LabelInput
                 label="מספר טיקט בSNOW"
                 placeholder="הוסף מספר טיקט"
-                value={formData.snowTicket}
+                value={formData.snow_ticket || ""}
                 setValue={(e) =>
-                  setFormData({ ...formData, snowTicket: e.target.value })
+                  setFormData({ ...formData, snow_ticket: e.target.value })
                 }
               />
               <div className="flex child:flex-1 justify-start child:flex child:flex-row-reverse child:items-center child:gap-3 h-[4.125rem] ">
@@ -190,12 +244,12 @@ export default function ManageIncidentForm({
                     onClick={() =>
                       setFormData({
                         ...formData,
-                        omerSent: !formData.omerSent,
+                        omer_sent: !formData.omer_sent,
                       })
                     }
                     type="button"
                     className={`${
-                      formData.omerSent ? "bg-secondary-text" : ""
+                      formData.omer_sent ? "bg-secondary-text" : ""
                     } rounded-sm border border-secondary-text size-5 text-white-color flex justify-center items-center`}
                   >
                     v
@@ -207,23 +261,23 @@ export default function ManageIncidentForm({
             <div className="flex flex-1 flex-col gap-3">
               <LabelButton
                 label="* משמעות טכנית"
-                values={impactSettings}
+                values={settings.impactSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
-                type={formData.technicalImpact}
+                type={formData.technical_impact}
                 setType={(value: keyof typeof ImpactEnum) => {
-                  setFormData({ ...formData, technicalImpact: value });
+                  setFormData({ ...formData, technical_impact: value });
                 }}
                 dropDownValue="impact"
               />
               <LabelText
                 label="* משמעות מבצעית"
                 placeholder="הוסף משמעות מבצעית"
-                value={formData.operationalImpact}
+                value={formData.operational_impact}
                 setValue={(e) =>
                   setFormData({
                     ...formData,
-                    operationalImpact: e.target.value,
+                    operational_impact: e.target.value,
                   })
                 }
               />
@@ -232,39 +286,88 @@ export default function ManageIncidentForm({
               <LabelApps
                 label="מערכות"
                 apps={apps}
-                value={formData.apps}
-                setValue={(value) =>
-                  setFormData({
-                    ...formData,
-                    apps: formData.apps.concat({ app: value }),
-                  })
+                value={apps.filter((app) =>
+                  selectedApps.apps.includes(app.id!)
+                )}
+                setValue={(value) => {
+                  !selectedApps.apps.includes(value.id)
+                    ? setSelectedApps({
+                        ...selectedApps,
+                        apps: [...selectedApps.apps, value.id],
+                      })
+                    : setSelectedApps({
+                        ...selectedApps,
+                        apps: selectedApps.apps.filter(
+                          (app) => app !== value.id
+                        ),
+                      });
+                }}
+                visible={selectedApps.visible}
+                setVisible={(value) =>
+                  setSelectedApps({ ...selectedApps, visible: value })
                 }
               />
+              <LabelApps
+                label="מערכות מושפעות"
+                apps={apps}
+                value={apps.filter((app) =>
+                  selectedImpacted.apps.includes(app.id!)
+                )}
+                setValue={(value) => {
+                  !selectedImpacted.apps.includes(value.id)
+                    ? setSelectedImpacted({
+                        ...selectedImpacted,
+                        apps: [...selectedImpacted.apps, value.id],
+                      })
+                    : setSelectedImpacted({
+                        ...selectedImpacted,
+                        apps: selectedImpacted.apps.filter(
+                          (app) => app !== value.id
+                        ),
+                      });
+                }}
+                visible={selectedImpacted.visible}
+                setVisible={(value) =>
+                  setSelectedImpacted({ ...selectedImpacted, visible: value })
+                }
+              />
+
               <LabelInput
                 label="* זמן תחילת אירוע"
                 type="datetime-local"
-                value={formData.startDate}
+                value={formData.start_date}
                 setValue={(e) =>
-                  setFormData({ ...formData, startDate: e.target.value })
+                  setFormData({ ...formData, start_date: e.target.value })
                 }
               />
               <LabelInput
                 label="זמן סיום אירוע"
                 type="datetime-local"
-                value={formData.endDate}
+                value={formData.end_date || ""}
                 setValue={(e) =>
-                  setFormData({ ...formData, endDate: e.target.value })
+                  setFormData({ ...formData, end_date: e.target.value })
                 }
               />
               <LabelInput
                 label="מספר טיקט בJIRA"
                 placeholder="הוסף מספר טיקט"
-                value={formData.jiraTicket}
+                value={formData.jira_ticket || ""}
                 setValue={(e) =>
-                  setFormData({ ...formData, jiraTicket: e.target.value })
+                  setFormData({ ...formData, jira_ticket: e.target.value })
                 }
               />
               {/* <LabelButton label="* סטטוס" /> */}
+              <LabelButton
+                label="* סטטוס"
+                values={settings.statusSettings}
+                openDropDown={openDropdown}
+                setOpenDropDown={setOpenDropDown}
+                type={formData.status}
+                setType={(value: keyof typeof StatusEnum) => {
+                  setFormData({ ...formData, status: value });
+                }}
+                dropDownValue="status"
+              />
             </div>
           </div>
           {/* Submit and Cancel buttons */}
@@ -284,7 +387,7 @@ export default function ManageIncidentForm({
                 ביטול
               </button>
             </div>
-            {incident && (
+            {incident.id && (
               <button
                 type="button"
                 className="px-5 py-2 rounded-md flex gap-2 bg-red-50 text-secondary-red items-center"

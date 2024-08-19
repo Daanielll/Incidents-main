@@ -18,7 +18,7 @@ export function Backdrop({
     // Motion div component that creates a backdrop overlay
     <motion.div
       // CSS classes for styling the backdrop
-      className="absolute top-0 left-0 h-full w-full flex items-center justify-center bg-black bg-opacity-10 overflow-hidden "
+      className="fixed top-0 left-0 h-full w-full flex items-center justify-center bg-black bg-opacity-10 overflow-hidden "
       // Click event handler
       onClick={onClick}
       // Transition properties for animating the backdrop
