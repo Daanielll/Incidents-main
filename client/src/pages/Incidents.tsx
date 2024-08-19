@@ -17,7 +17,7 @@ export default function Incidents() {
   const [searchParams, setSearchParms] = useSearchParams();
   const [pagination, setPagination] = useState({
     pageSize: Number(searchParams.get("limit")) || 10,
-    pageIndex: Number(searchParams.get("page")) || 1,
+    pageIndex: Number(searchParams.get("page")) || 0,
   });
   useEffect(() => {
     setSearchParms({

@@ -14,6 +14,7 @@ router
 router
   .route("/:incId")
   .get(incidentController.getIncidentById)
-  .delete(incidentController.deleteIncident);
+  .delete(incidentController.deleteIncident)
+  .patch(authToken, incidentController.updateIncident);
 
 module.exports = router;

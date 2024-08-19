@@ -59,6 +59,86 @@ const createIncident = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+const updateIncident = async (req, res) => {
+  const userId = req.user.id;
+  const { apps, impacted_apps, ...params } = req.body;
+  const id = Number(req.params.incId);
+
+  if (!id) return res.status(400).json({ error: "שדות חובה חסרים" });
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!user) return res.status(400).json({ error: "משתמש לא קיים" });
+
+    const currentApps = await prisma.incident.findUnique({
+      where: { id },
+      select: {
+        IncidentApp: { select: { appId: true } },
+        IncidentImpact: { select: { appId: true } },
+      },
+    });
+    if (!currentApps)
+      return res.status(404).json({ error: "לא קיימת פעילות עם המזהה הזה" });
+    const currentAppsArrays = {
+      apps: currentApps.IncidentApp.map((app) => app.appId),
+      impacted_apps: currentApps.IncidentImpact.map((app) => app.appId),
+    };
+
+    const appsToDelete = {
+      apps: apps ? currentAppsArrays.apps.filter((a) => !apps.includes(a)) : [],
+      impacted_apps: impacted_apps
+        ? currentAppsArrays.impacted_apps.filter(
+            (a) => !impacted_apps.includes(a)
+          )
+        : [],
+    };
+
+    return res.json(appsToDelete);
+    const result = await prisma.$transaction(async (tx) => {
+      const incident = await tx.incident.update({
+        where: { id },
+        data: { ...params },
+      });
+      if (apps) {
+        for (let appId of apps) {
+          await tx.incidentApp.deleteMany({
+            where: { AND: { appId, incidentId: incident.id } },
+          });
+          await tx.incidentApp.create({
+            data: {
+              incidentId: incident.id,
+              appId,
+            },
+          });
+        }
+      }
+      if (impacted_apps) {
+        for (let appId of impacted_apps) {
+          await tx.incidentImpact.deleteMany({
+            where: { AND: { appId, incidentId: incident.id } },
+          });
+
+          await tx.incidentImpact.create({
+            data: {
+              incidentId: incident.id,
+              appId,
+            },
+          });
+        }
+      }
+
+      return { incident };
+    });
+
+    return res.status(201).json(result);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 const getAllIncidents = async (req, res) => {
   const { page = 0, limit = 10 } = req.query;
@@ -78,6 +158,7 @@ const getAllIncidents = async (req, res) => {
       },
       skip: Number(page) * Number(limit),
       take: Number(limit),
+      orderBy: { start_date: "desc" },
     });
     const count = await prisma.incident.count();
     return res.status(201).json({ incidents, count });
@@ -160,4 +241,5 @@ module.exports = {
   getIncidentById,
   createIncidentComment,
   deleteIncident,
+  updateIncident,
 };
