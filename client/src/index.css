@@ -15,7 +15,7 @@
 }
 
 .input-default-np {
-  @apply bg-light border border-border rounded-md placeholder:text-secondary-text font-normal text-right w-full outline-none;
+  @apply bg-white-color border border-border rounded-md placeholder:text-secondary-text font-normal text-right w-full outline-none;
 }
 
 .toast-rtl {
