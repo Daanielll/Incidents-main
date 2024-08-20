@@ -2,6 +2,7 @@ import { AppType } from "../../../types/AppType";
 import { Dropdown } from "../../Dropdown";
 import chevronDown from "../../../assets/chevronDownIcon.svg";
 import { useState } from "react";
+import searchIcon from "../../../assets/searchIcon.svg";
 export function LabelButton({
   label,
   setOpenDropDown,
@@ -21,9 +22,14 @@ export function LabelButton({
 }) {
   return (
     // The container for the label button and dropdown menu
-    <div className="flex flex-col items-end gap-1 flex-1">
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="flex flex-col items-end gap-1 flex-1"
+    >
       {/* The label text */}
-      <h4 className="font-medium text-sm mr-1">{label}</h4>
+      <h4 dir="rtl" className="font-medium text-sm mr-1">
+        {label}
+      </h4>
       {/* The dropdown button */}
       <h1
         onClick={() =>
@@ -36,6 +42,7 @@ export function LabelButton({
         <button type="button">
           {/* The dropdown icon */}
           <img
+            draggable={false}
             className={`${
               openDropDown == dropDownValue ? "rotate-180" : "rotate-0"
             } transition-all`}
@@ -61,72 +68,98 @@ export function LabelApps({
   setValue,
   visible,
   setVisible,
+  dropDownValue,
 }: {
   label: string;
   apps: AppType[];
   value: AppType[];
   setValue: (e: any) => void;
-  visible: boolean;
+  visible: string | null;
   setVisible: (e: any) => void;
+  dropDownValue: string;
 }) {
   const [search, setSearch] = useState("");
   return (
-    <div className="flex flex-col items-end gap-1 flex-1">
-      <h4 className="font-medium text-sm mr-1">{label}</h4>
-      <div dir="rtl" className="w-full relative">
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="flex flex-col items-end gap-1 w-full relative"
+    >
+      <h4 dir="rtl" className="font-medium text-sm mr-1">
+        {label}
+      </h4>
+      <div className="w-full h-6 mb-4 border-y border-white-color border-opacity-0">
         <div
-          className="w-full gap-2 input-default cursor-pointer pl-2 flex text-ellipsis overflow-hidden"
-          onClick={() => setVisible(!visible)}
+          dir="rtl"
+          className={`${
+            visible === dropDownValue ? "absolute z-[100] right-0" : ""
+          } flex gap-2 flex-col bg-white-color`}
         >
-          <button type="button">
+          <button
+            onClick={() =>
+              setVisible((prev: string) =>
+                prev == dropDownValue ? null : dropDownValue
+              )
+            }
+            type="button"
+            className={`${
+              visible === dropDownValue ? "flex-wrap" : " overflow-hidden"
+            } py-2 px-3 bg-white-color border border-border rounded-md text-text box-content min-h-6 flex gap-2 relative items-center`}
+          >
             <img
-              className={`${
-                visible ? "rotate-180" : "rotate-0"
-              } transition-all`}
               src={chevronDown}
-              alt=""
+              className={`${
+                visible === dropDownValue ? "rotate-180" : "rotate-0"
+              } transition-all `}
             />
-          </button>
-          <div className="h-6 flex gap-2 w-0 flex-1">
-            <div className="flex gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-              {value.map((v, index) => (
-                <p key={index} className="px-1 bg-light rounded-md">
-                  {v.name}
+            {value.map((app) => {
+              return (
+                <p className="px-1 rounded-md bg-light whitespace-nowrap">
+                  {app.name}
                 </p>
-              ))}
+              );
+            })}
+          </button>
+          {visible === dropDownValue && (
+            <div className="flex flex-col gap-2 w-full py-2 px-3 bg-white-color border-border rounded-md border shadow-sm max-h-64 overflow-auto">
+              <div className="relative w-full">
+                <input
+                  dir="rtl"
+                  className="input-default-np py-2 pl-3 pr-8"
+                  placeholder="סנן לפי שם"
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <img
+                  draggable="false"
+                  className="absolute top-1/2 -translate-y-1/2 right-2 select-none"
+                  src={searchIcon}
+                  alt=""
+                />
+              </div>
+
+              <div dir="rtl" className="w-full h-fit flex flex-wrap gap-2">
+                {apps
+                  .filter((app) => app.name.includes(search))
+                  .map((app) => {
+                    return (
+                      <p
+                        onClick={() => setValue(app)}
+                        key={app.id}
+                        className={`${
+                          value.includes(app)
+                            ? "border-secondary bg-light"
+                            : "border-border"
+                        } rounded-md  hover:bg-border p-2 text-right  cursor-pointer h-fit border box-border`}
+                      >
+                        {app.name}
+                      </p>
+                    );
+                  })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
-        {visible && (
-          <div className="absolute top-12 left-0 flex flex-col gap-2 w-full p-2 items-end bg-white border border-border rounded-md overflow-hidden z-50 shadow-sm">
-            <div className="w-full">
-              <input
-                dir="rtl"
-                className="p-2 border border-border rounded-md w-full outline-none"
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <div className="w-full flex gap-1 justify-start max-h-64 overflow-auto flex-wrap">
-              {apps
-                .filter((app) => app.name.includes(search))
-                .map((app) => (
-                  <button
-                    onClick={() => setValue(app)}
-                    type="button"
-                    className={`${
-                      value.includes(app)
-                        ? "border-secondary-text"
-                        : "border-border"
-                    } rounded-md bg-light hover:bg-border p-2 text-right hover:brightness-90 cursor-pointer h-fit border box-border`}
-                  >
-                    {app.name}
-                  </button>
-                ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
