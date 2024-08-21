@@ -24,34 +24,43 @@ import {
 } from "./incidentForm/Sections";
 import { useNewIncident } from "../../hooks/useNewIncident";
 import { toast } from "sonner";
+import { useAllApps } from "../../hooks/Apps/useAllApps";
 
 type Props = {
   handleClose: (e: React.MouseEvent) => void;
   incident: IncidentType;
-  apps: AppType[];
 };
 
-export default function ManageIncidentForm({
-  handleClose,
-  incident,
-  apps,
-}: Props) {
+export default function ManageIncidentForm({ handleClose, incident }: Props) {
+  const apps = useAllApps().data;
   const newIncident = useNewIncident();
   const [formData, setFormData] = useState(incident);
   const [selectedApps, setSelectedApps] = useState<number[]>([]);
-  formData.IncidentApp.map((app) =>
-    setSelectedApps([...selectedApps, app.app.id!])
-  );
+
+  if (typeof formData.start_date === "string" && formData.start_date !== "")
+    setFormData((prev) => {
+      return { ...prev, start_date: new Date(prev.start_date) };
+    });
+  if (selectedApps.length === 0)
+    formData.IncidentApp.map((app) =>
+      setSelectedApps((prev) => [...prev, app.app.id!])
+    );
 
   const [selectedImpacted, setSelectedImpacted] = useState<number[]>([]);
-  formData.IncidentImpact.map((app) =>
-    setSelectedImpacted([...selectedImpacted, app.app.id!])
-  );
-
+  if (selectedImpacted.length === 0)
+    formData.IncidentImpact.map((app) =>
+      setSelectedImpacted((prev) => [...prev, app.app.id!])
+    );
   const [openDropdown, setOpenDropDown] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
+    // console.log(incident["IncidentImpact"]);
+
+    for (const i of Object.keys(incident)) {
+      console.log(i);
+    }
     e.preventDefault();
+    return;
     const {
       IncidentApp,
       IncidentImpact,
@@ -96,6 +105,9 @@ export default function ManageIncidentForm({
         className: "toast-rtl",
       });
   };
+
+  if (!apps) return <h1 className="fixed left-1/2 top-1/2">Loading</h1>;
+
   return (
     <Backdrop onClick={() => {}}>
       <motion.div
@@ -121,7 +133,7 @@ export default function ManageIncidentForm({
       >
         <div className="flex justify-between flex-row-reverse w-full border-b border-border py-4 px-6">
           <h1 className="font-medium text-2xl">
-            {!incident ? "הוסף אירוע" : "ערוך אירוע"}
+            {!incident.id ? "הוסף אירוע" : "ערוך אירוע"}
           </h1>
           <button onClick={handleClose}>
             <img src={crossIcon} alt="" />

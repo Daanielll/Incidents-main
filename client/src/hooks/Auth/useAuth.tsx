@@ -7,6 +7,7 @@ export interface LoginCredentials {
   password: string;
 }
 export const useUser = () => {
+  console.log("getting user");
   const queryClient = useQueryClient();
   const { data: user, isLoading } = useQuery<UserType | null>({
     queryKey: ["userData"],
@@ -48,7 +49,7 @@ export const useUser = () => {
       }
     },
   });
-
+  console.log("user: ", user);
   return {
     user: user ?? null,
     isLoading,

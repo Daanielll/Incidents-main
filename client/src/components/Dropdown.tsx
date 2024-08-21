@@ -5,8 +5,8 @@
  * @param setValue - The function to update the selected value
  */
 export function Dropdown({
-  data, // The array of options to display in the dropdown
-  setValue, // The function to update the selected value
+  data,
+  setValue,
 }: {
   data: { name: string; value: string | null }[];
   setValue: (e: any) => void;
@@ -18,11 +18,13 @@ export function Dropdown({
       {data.map((item) => (
         <button
           // Event handler for when the option is clicked
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             setValue(item.value);
           }}
-          key={item.value} // Unique identifier for each option
+          key={item.value}
           className=" w-full px-3 py-2 text-right hover:bg-light cursor-pointer"
+          type="button"
         >
           {/* The name of the option */}
           {item.name}

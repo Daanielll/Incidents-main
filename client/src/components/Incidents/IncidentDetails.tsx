@@ -14,6 +14,7 @@ import { useNewMessage } from "../../hooks/useNewMessage";
 import { useState } from "react";
 import { useDeleteIncident } from "../../hooks/useDeleteIncident";
 import { ConfirmationModal } from "../ConfirmationModal";
+import ManageIncidentForm from "./ManageIncidentForm";
 
 /**
  * The IncidentDetails component renders the incident details page, including the incident's activity
@@ -30,6 +31,7 @@ export default function IncidentDetails() {
   const newMessage = useNewMessage(Number(id));
   const [messageText, setMessageText] = useState("");
   const [deleteForm, setDeleteForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
 
   // If still fetching, return loading text
   if (!data) return <h1>Loading</h1>;
@@ -175,7 +177,12 @@ export default function IncidentDetails() {
               >
                 מחיקה
               </button>
-              <button className="bg-primary text-white-color">עריכה</button>
+              <button
+                onClick={() => setShowEditForm(true)}
+                className="bg-primary text-white-color"
+              >
+                עריכה
+              </button>
             </div>
           </div>
           {/* RIGHT SIDE */}
@@ -277,19 +284,25 @@ export default function IncidentDetails() {
           </div>
         </motion.div>
       </div>
+      {/* <AnimatePresence> */}
       {deleteForm && (
-        <AnimatePresence>
-          <ConfirmationModal
-            handleClose={() => setDeleteForm(false)}
-            text="האם אתה בטוח שאתה רוצה למחוק את האירוע? פעולה זו היא בלתי ניתנת לביטול"
-            title="מחיקת אירוע"
-            handleSubmit={() => {
-              handleClose();
-              deleteIncident(data.id!);
-            }}
-          />
-        </AnimatePresence>
+        <ConfirmationModal
+          handleClose={() => setDeleteForm(false)}
+          text="האם אתה בטוח שאתה רוצה למחוק את האירוע? פעולה זו היא בלתי ניתנת לביטול"
+          title="מחיקת אירוע"
+          handleSubmit={() => {
+            handleClose();
+            deleteIncident(data.id!);
+          }}
+        />
       )}
+      {showEditForm && (
+        <ManageIncidentForm
+          handleClose={() => setShowEditForm(false)}
+          incident={data}
+        />
+      )}
+      {/* </AnimatePresence> */}
     </>
   );
 }

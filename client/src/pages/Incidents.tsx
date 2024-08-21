@@ -4,7 +4,6 @@ import { useIncidentData } from "../hooks/useIncidentData";
 import { Outlet, useSearchParams } from "react-router-dom";
 import ManageIncidentForm from "../components/Incidents/ManageIncidentForm";
 import { AnimatePresence } from "framer-motion";
-import { useAllApps } from "../hooks/Apps/useAllApps";
 import { ImpactEnum, StatusEnum } from "../types/IncidentType";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
@@ -28,7 +27,6 @@ export default function Incidents() {
 
   const incidents = useIncidentData(pagination.pageSize, pagination.pageIndex);
   const [showForm, setShowForm] = useState(false);
-  const apps = useAllApps();
   const statusColor = {
     green: "bg-secondary-green text-secondary-green",
     yellow: "bg-secondary-yellow text-secondary-yellow",
@@ -249,7 +247,6 @@ export default function Incidents() {
               technical_impact: null,
               start_date: "",
             }}
-            apps={apps.data!}
           />
         )}{" "}
       </AnimatePresence>

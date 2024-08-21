@@ -61,18 +61,18 @@ const createIncident = async (req, res) => {
 };
 const updateIncident = async (req, res) => {
   const userId = req.user.id;
-  const { apps, impacted_apps, ...params } = req.body;
+  const { apps, impacted_apps, ...params } = req.body; // exclude apps and impacted apps from the rest
   const id = Number(req.params.incId);
 
   if (!id) return res.status(400).json({ error: "שדות חובה חסרים" });
-
   try {
+    // Validate user first
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true },
     });
     if (!user) return res.status(400).json({ error: "משתמש לא קיים" });
-
+    // Get the apps and impact apps that the inc already has
     const currentApps = await prisma.incident.findUnique({
       where: { id },
       select: {
@@ -82,11 +82,12 @@ const updateIncident = async (req, res) => {
     });
     if (!currentApps)
       return res.status(404).json({ error: "לא קיימת פעילות עם המזהה הזה" });
+    // Move all the apps to an array of IDs
     const currentAppsArrays = {
       apps: currentApps.IncidentApp.map((app) => app.appId),
       impacted_apps: currentApps.IncidentImpact.map((app) => app.appId),
     };
-
+    // Create an array of apps to delete, by ID
     const appsToDelete = {
       apps: apps ? currentAppsArrays.apps.filter((a) => !apps.includes(a)) : [],
       impacted_apps: impacted_apps
@@ -95,41 +96,67 @@ const updateIncident = async (req, res) => {
           )
         : [],
     };
+    // Create an array of apps to add, by ID
+    const appsToAdd = {
+      apps: apps ? apps.filter((a) => !currentAppsArrays.apps.includes(a)) : [],
+      impacted_apps: impacted_apps
+        ? impacted_apps.filter(
+            (a) => !currentAppsArrays.impacted_apps.includes(a)
+          )
+        : [],
+    };
 
-    return res.json(appsToDelete);
+    // Do it all in a transaction so there wont be any data loss
     const result = await prisma.$transaction(async (tx) => {
+      // first update the incident itself
       const incident = await tx.incident.update({
         where: { id },
         data: { ...params },
       });
+
+      // delete all apps from the appsToDelete array and then create new new ones
       if (apps) {
-        for (let appId of apps) {
+        if (appsToDelete.apps[0])
           await tx.incidentApp.deleteMany({
-            where: { AND: { appId, incidentId: incident.id } },
-          });
-          await tx.incidentApp.create({
-            data: {
-              incidentId: incident.id,
-              appId,
+            where: {
+              AND: {
+                appId: { in: appsToDelete.apps },
+                incidentId: incident.id,
+              },
             },
           });
-        }
+        if (appsToAdd.apps[0])
+          for (appId of appsToAdd.apps) {
+            await tx.incidentApp.create({
+              data: {
+                incidentId: incident.id,
+                appId,
+              },
+            });
+          }
       }
+
+      // Then do the same thing for impacted apps
       if (impacted_apps) {
-        for (let appId of impacted_apps) {
+        if (appsToDelete.impacted_apps[0])
           await tx.incidentImpact.deleteMany({
-            where: { AND: { appId, incidentId: incident.id } },
-          });
-
-          await tx.incidentImpact.create({
-            data: {
-              incidentId: incident.id,
-              appId,
+            where: {
+              AND: {
+                appId: { in: appsToDelete.impacted_apps },
+                incidentId: incident.id,
+              },
             },
           });
-        }
+        if (appsToAdd.impacted_apps[0])
+          for (appId of appsToAdd.impacted_apps) {
+            await tx.incidentImpact.create({
+              data: {
+                incidentId: incident.id,
+                appId,
+              },
+            });
+          }
       }
-
       return { incident };
     });
 

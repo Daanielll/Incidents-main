@@ -22,34 +22,30 @@ export function LabelButton({
 }) {
   return (
     // The container for the label button and dropdown menu
-    <div
-      onClick={(e) => e.stopPropagation()}
-      className="flex flex-col items-end gap-1 flex-1"
-    >
+    <div className="flex flex-col items-end gap-1 flex-1">
       {/* The label text */}
       <h4 dir="rtl" className="font-medium text-sm mr-1">
         {label}
       </h4>
       {/* The dropdown button */}
       <h1
-        onClick={() =>
+        onClick={(e) => {
+          e.stopPropagation();
           setOpenDropDown((prev) =>
             prev == dropDownValue ? null : dropDownValue
-          )
-        }
+          );
+        }}
         className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-border rounded-md w-full flex-row-reverse relative"
       >
-        <button type="button">
-          {/* The dropdown icon */}
-          <img
-            draggable={false}
-            className={`${
-              openDropDown == dropDownValue ? "rotate-180" : "rotate-0"
-            } transition-all`}
-            src={chevronDown}
-            alt=""
-          />
-        </button>
+        {/* The dropdown icon */}
+        <img
+          draggable={false}
+          className={`${
+            openDropDown == dropDownValue ? "rotate-180" : "rotate-0"
+          } transition-all select-none`}
+          src={chevronDown}
+          alt=""
+        />
         {/* The selected dropdown value */}
         {values.find((r) => r.value == type)?.name}
         {/* Render the dropdown menu if it is open */}
@@ -92,7 +88,7 @@ export function LabelApps({
           dir="rtl"
           className={`${
             visible === dropDownValue ? "absolute z-[100] right-0" : ""
-          } flex gap-2 flex-col bg-white-color`}
+          } flex gap-2 flex-col bg-white-color w-full`}
         >
           <button
             onClick={() =>
@@ -109,11 +105,14 @@ export function LabelApps({
               src={chevronDown}
               className={`${
                 visible === dropDownValue ? "rotate-180" : "rotate-0"
-              } transition-all `}
+              } transition-all select-none`}
             />
             {value.map((app) => {
               return (
-                <p className="px-1 rounded-md bg-light whitespace-nowrap">
+                <p
+                  key={app.id}
+                  className="px-1 rounded-md bg-light whitespace-nowrap"
+                >
                   {app.name}
                 </p>
               );
@@ -203,9 +202,12 @@ export function LabelInput({
   label: string;
   type?: string;
   placeholder?: string;
-  value: string | null;
+  value: string | null | Date;
   setValue: (e: any) => void;
 }) {
+  const dateValue =
+    typeof value === "object" ? value?.toISOString().slice(0, 16) : null;
+  if (dateValue) console.log(dateValue);
   return (
     <div className="form-text-div flex-1">
       <label dir="rtl" className="font-medium text-sm mr-1" htmlFor={label}>
@@ -215,7 +217,7 @@ export function LabelInput({
         dir="rtl"
         id={label}
         type={type}
-        value={value || ""}
+        value={dateValue ? dateValue : typeof value === "string" ? value : ""}
         onChange={setValue}
         placeholder={placeholder}
         className="input-default w-full"
