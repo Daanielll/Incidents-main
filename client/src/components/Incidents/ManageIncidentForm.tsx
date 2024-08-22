@@ -37,10 +37,23 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
   const [formData, setFormData] = useState(incident);
   const [selectedApps, setSelectedApps] = useState<number[]>([]);
 
-  if (typeof formData.start_date === "string" && formData.start_date !== "")
+  // if (typeof formData.start_date === "string" && formData.start_date !== "")
+  //   setFormData((prev) => {
+  //     return { ...prev, start_date: new Date(prev.start_date) };
+  //   });
+  // if (typeof formData.end_date === "string" && formData.end_date !== "")
+  //   setFormData((prev) => {
+  //     return { ...prev, end_date: formData.end_date ? new Date(prev.end_date) : null };
+  //   });
+  if (formData.start_date.length === 24)
     setFormData((prev) => {
-      return { ...prev, start_date: new Date(prev.start_date) };
+      return { ...prev, start_date: prev.start_date.slice(0, 16) };
     });
+  if (formData.end_date && formData.end_date.length === 24)
+    setFormData((prev) => {
+      return { ...prev, end_date: prev.end_date.slice(0, 16) };
+    });
+
   if (selectedApps.length === 0)
     formData.IncidentApp.map((app) =>
       setSelectedApps((prev) => [...prev, app.app.id!])
@@ -56,9 +69,23 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     // console.log(incident["IncidentImpact"]);
 
-    for (const i of Object.keys(incident)) {
-      console.log(i);
-    }
+    // for (const key of Object.keys(incident)) {
+    //   console.log("key: " + incident[`${key}`]);
+    // }
+    // const changes = {for (const [key, value] of Object.entries(formData)) {
+    //   (incident[key] !== value && {...key: value})
+    // }}
+
+    const changes = Object.entries(formData).reduce((all, [key, value]) => {
+      if (incident[key] !== value) {
+        if (key === "start_date" || key === "end_date") {
+          console.log(incident[key].slice(0, 16) == value);
+        }
+        all[key] = value;
+      }
+      return all;
+    }, {});
+    // console.log(changes);
     e.preventDefault();
     return;
     const {

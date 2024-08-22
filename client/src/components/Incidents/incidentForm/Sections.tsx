@@ -202,12 +202,9 @@ export function LabelInput({
   label: string;
   type?: string;
   placeholder?: string;
-  value: string | null | Date;
+  value: string | null;
   setValue: (e: any) => void;
 }) {
-  const dateValue =
-    typeof value === "object" ? value?.toISOString().slice(0, 16) : null;
-  if (dateValue) console.log(dateValue);
   return (
     <div className="form-text-div flex-1">
       <label dir="rtl" className="font-medium text-sm mr-1" htmlFor={label}>
@@ -217,7 +214,7 @@ export function LabelInput({
         dir="rtl"
         id={label}
         type={type}
-        value={dateValue ? dateValue : typeof value === "string" ? value : ""}
+        value={value || ""}
         onChange={setValue}
         placeholder={placeholder}
         className="input-default w-full"
