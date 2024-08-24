@@ -6,31 +6,62 @@ import ManageIncidentForm from "../components/Incidents/incidentForm/ManageIncid
 import { AnimatePresence } from "framer-motion";
 import { ImpactEnum, StatusEnum } from "../types/IncidentType";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useDebounce } from "../hooks/useDebounce";
+import searchIcon from "../assets/searchIcon.svg";
 
 /**
  * Fetches incidents data, which is then passed to the IncidentTable component to render the table.
  */
 
 export default function Incidents() {
+  // Get search params and add the page and limit to a pagination state
   const [searchParams, setSearchParms] = useSearchParams();
   const [pagination, setPagination] = useState({
     pageSize: Number(searchParams.get("limit")) || 10,
     pageIndex: Number(searchParams.get("page")) || 0,
   });
+  // Get search query from the search params and create a debounced var for it
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const debouncedSearch = useDebounce(search);
+  // Change the URL when pagination state change
   useEffect(() => {
     setSearchParms({
-      limit: pagination.pageSize.toString(),
-      page: pagination.pageIndex.toString(),
+      ...(pagination.pageSize !== 10 && {
+        limit: pagination.pageSize.toString(),
+      }),
+      ...(pagination.pageIndex !== 0 && {
+        page: pagination.pageIndex.toString(),
+      }),
+      ...(search !== "" && {
+        search: search,
+      }),
     });
   }, [pagination]);
+  // Change the URL when debounced search change
+  useEffect(() => {
+    setPagination({
+      ...pagination,
+      pageIndex: 0,
+    });
+    setSearchParms({
+      ...searchParams,
+      ...(search !== "" && {
+        search,
+      }),
+    });
+  }, [debouncedSearch]);
 
-  const incidents = useIncidentData(pagination.pageSize, pagination.pageIndex);
+  // Get incident data
+  const incidents = useIncidentData();
+  // State to control if new incident form is shown
   const [showForm, setShowForm] = useState(false);
+  // Object to control status colors for the status column
   const statusColor = {
     green: "bg-secondary-green text-secondary-green",
     yellow: "bg-secondary-yellow text-secondary-yellow",
     red: "bg-secondary-red text-secondary-red",
   };
+  // Manage the table's columns
   const columns = [
     {
       accessorKey: "status",
@@ -100,7 +131,11 @@ export default function Incidents() {
             {props.getValue().map((app: any, index: number) => {
               if (index > 2) return;
               if (index === 2)
-                return <p className="px-2 py-1 bg-light rounded-md">...</p>;
+                return (
+                  <p key="ellipsis" className="px-2 py-1 bg-light rounded-md">
+                    ...
+                  </p>
+                );
               return (
                 <h1
                   className="px-2 py-1 bg-light rounded-md"
@@ -122,7 +157,11 @@ export default function Incidents() {
           {props.getValue().map((app: any, index: number) => {
             if (index > 2) return;
             if (index === 2)
-              return <p className="px-2 py-1 bg-light rounded-md">...</p>;
+              return (
+                <p key="ellipsis" className="px-2 py-1 bg-light rounded-md">
+                  ...
+                </p>
+              );
             return (
               <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
                 {app.app.name}
@@ -149,7 +188,7 @@ export default function Incidents() {
       header: "שם אירוע",
     },
   ];
-
+  // Create a table instance
   const table = useReactTable({
     columns,
     data: incidents.data?.incidents || [],
@@ -175,6 +214,22 @@ export default function Incidents() {
             >
               חדש +
             </button>
+            <div className="relative w-80">
+              <input
+                dir="rtl"
+                className="input-default-np py-2 pl-3 pr-8"
+                placeholder="סנן לפי שם"
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <img
+                draggable="false"
+                className="absolute top-1/2 -translate-y-1/2 right-2 select-none"
+                src={searchIcon}
+                alt=""
+              />
+            </div>
           </div>
           <div className="flex-1 flex flex-col justify-between">
             <div className="flex-1">

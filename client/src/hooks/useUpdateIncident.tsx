@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-import { useSearchParams } from "react-router-dom";
+import useSearchQuery from "./useSearchQuery";
 
 export function useUpdateIncident() {
-  const [searchParams, setSearchParms] = useSearchParams();
+  const searchParams = useSearchQuery();
   const pagination = {
-    pageSize: Number(searchParams.get("size")) || 10,
-    pageIndex: Number(searchParams.get("page")) || 0,
+    pageSize: Number(searchParams.size) || 10,
+    pageIndex: Number(searchParams.page) || 0,
   };
   const queryClient = useQueryClient();
   const { mutateAsync } = useMutation({
@@ -32,7 +32,7 @@ export function useUpdateIncident() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({
-        queryKey: ["incidents", pagination.pageIndex, pagination.pageSize],
+        queryKey: ["incidents", searchParams],
       });
       queryClient.invalidateQueries({
         queryKey: ["incidents", data.incident.id],

@@ -119,7 +119,7 @@ export default function IncidentDetails() {
               <div className="w-full h-px bg-border"></div>
               <div className="text-right">
                 <h5 className="incident-label">:משמעות מבצעית</h5>
-                <p>{data.description}</p>
+                <p>{data.operational_impact}</p>
               </div>
 
               <BottomSection
