@@ -45,8 +45,8 @@ export interface IncidentType {
   technical_impact: keyof typeof ImpactEnum | null;
   operational_impact: string;
   monitored: boolean;
-  start_date: string | Date;
-  end_date?: string;
+  start_date: Date;
+  end_date?: Date | null;
   status: keyof typeof StatusEnum | null;
   opened_by?: { first_name: string; last_name: string };
   IncidentApp: { app: AppType }[];

@@ -14,7 +14,7 @@ import { useNewMessage } from "../../hooks/useNewMessage";
 import { useState } from "react";
 import { useDeleteIncident } from "../../hooks/useDeleteIncident";
 import { ConfirmationModal } from "../ConfirmationModal";
-import ManageIncidentForm from "./ManageIncidentForm";
+import ManageIncidentForm from "./incidentForm/ManageIncidentForm";
 
 /**
  * The IncidentDetails component renders the incident details page, including the incident's activity
@@ -36,12 +36,16 @@ export default function IncidentDetails() {
   // If still fetching, return loading text
   if (!data) return <h1>Loading</h1>;
   // Make dates objects and calculate MTTR - if no end date, calculate MTTR from start date until now
-  const startDate = new Date(data.start_date);
-  const endDate = data.end_date ? new Date(data.end_date) : null;
+
   const now = new Date();
-  const mttr = endDate
-    ? ((endDate.valueOf() - startDate.valueOf()) / (1000 * 60 * 60)).toFixed(2)
-    : ((now.valueOf() - startDate.valueOf()) / (1000 * 60 * 60)).toFixed(2);
+  const mttr = data.end_date
+    ? (
+        (data.end_date.valueOf() - data.start_date.valueOf()) /
+        (1000 * 60 * 60)
+      ).toFixed(2)
+    : ((now.valueOf() - data.start_date.valueOf()) / (1000 * 60 * 60)).toFixed(
+        2
+      );
 
   // Handle sending a new message
   const handleSendMessage = (e: any) => {
@@ -127,9 +131,12 @@ export default function IncidentDetails() {
               {data.snow_ticket && (
                 <BottomSection title=":SNOWטיקט ב" value={data.snow_ticket} />
               )}
+              {data.jira_ticket && (
+                <BottomSection title=":JIRAטיקט ב" value={data.jira_ticket} />
+              )}
               <BottomSection
                 title=":תחילת אירוע"
-                value={startDate.toLocaleString("he-IL", {
+                value={data.start_date.toLocaleString("he-IL", {
                   day: "numeric",
                   month: "short",
                   year: "2-digit",
@@ -140,8 +147,8 @@ export default function IncidentDetails() {
               <BottomSection
                 title=":סיום אירוע"
                 value={
-                  endDate
-                    ? endDate.toLocaleString("he-IL", {
+                  data.end_date
+                    ? data.end_date.toLocaleString("he-IL", {
                         day: "numeric",
                         month: "short",
                         year: "2-digit",
@@ -284,25 +291,25 @@ export default function IncidentDetails() {
           </div>
         </motion.div>
       </div>
-      {/* <AnimatePresence> */}
-      {deleteForm && (
-        <ConfirmationModal
-          handleClose={() => setDeleteForm(false)}
-          text="האם אתה בטוח שאתה רוצה למחוק את האירוע? פעולה זו היא בלתי ניתנת לביטול"
-          title="מחיקת אירוע"
-          handleSubmit={() => {
-            handleClose();
-            deleteIncident(data.id!);
-          }}
-        />
-      )}
-      {showEditForm && (
-        <ManageIncidentForm
-          handleClose={() => setShowEditForm(false)}
-          incident={data}
-        />
-      )}
-      {/* </AnimatePresence> */}
+      <AnimatePresence>
+        {deleteForm && (
+          <ConfirmationModal
+            handleClose={() => setDeleteForm(false)}
+            text="האם אתה בטוח שאתה רוצה למחוק את האירוע? פעולה זו היא בלתי ניתנת לביטול"
+            title="מחיקת אירוע"
+            handleSubmit={() => {
+              handleClose();
+              deleteIncident(data.id!);
+            }}
+          />
+        )}
+        {showEditForm && (
+          <ManageIncidentForm
+            handleClose={() => setShowEditForm(false)}
+            incident={data}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

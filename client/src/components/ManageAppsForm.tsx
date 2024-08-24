@@ -1,17 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
 import crossIcon from "../assets/crossIcon.svg";
-import chevronDown from "../assets/chevronDownIcon.svg";
 import { useState } from "react";
-import { Dropdown } from "./Dropdown";
 import trashIcon from "../assets/trashIcon.svg";
 import settings from "../types/AppSettings";
-
 import { ConfirmationModal } from "./ConfirmationModal";
 import { AppType } from "../types/AppType";
 import { Backdrop } from "./Backdrop";
 import { useEditApp } from "../hooks/Apps/useEditApp";
 import { useDeleteApp } from "../hooks/Apps/useDeleteApp";
 import { useNewApp } from "../hooks/Apps/useNewApp";
+import { toast } from "sonner";
+import { envEnum, PlatformEnum, SiteEnum } from "../types/IncidentType";
+import { LabelButton } from "./Incidents/incidentForm/Sections";
 
 /**
  * A form component to Add / Edit / Delete an app.
@@ -25,58 +25,65 @@ export function ManageAppsForm({
   handleClose: (e: React.FormEvent) => void;
   app: AppType;
 }) {
+  // use CRUD hooks
   const createApp = useNewApp();
   const editApp = useEditApp();
   const deleteApp = useDeleteApp();
-  const [name, setName] = useState(app.name);
-  const [description, setDescription] = useState(app.description);
-  const [operationalImpact, setOperationalImpact] = useState(
-    app.operational_impact
-  );
-  const [env, setEnv] = useState(app.env);
-  const [mainSite, setMainSite] = useState<AppType["main_site"]>(app.main_site);
-  const [recovery, setRecovery] = useState(app.recovery);
+
+  const [formData, setFormData] = useState(app);
+
   const [openDropDown, setOpenDropDown] = useState<string | null>(null);
-  const [platform, setPlatform] = useState(app.platform);
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Handles form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // if app id is 0, create new app
-    if (app.id === 0) {
-      createApp({
-        name,
-        description: description === "" ? null : description,
-        operational_impact: operationalImpact === "" ? null : operationalImpact,
-        env,
-        main_site: mainSite,
-        recovery,
-        platform,
+    const { description, operational_impact, ...filteredApp } = formData;
+    const finalApp = {
+      ...filteredApp,
+      ...(description &&
+        description.trim() !== "" && { description: description }),
+      ...(operational_impact &&
+        operational_impact.trim() !== "" && {
+          operational_impact: operational_impact,
+        }),
+    };
+    if (finalApp.name.trim() !== "") {
+      // if app id is 0, create new app
+      if (app.id === 0) {
+        createApp(finalApp);
+      } else if (app.id && app.id > 0) {
+        // Create a changes object, which has all the fields that have been changed
+        const changes = {
+          ...(finalApp.name !== app.name && { name: finalApp.name }),
+          ...(description !== app.description && {
+            description,
+          }),
+          ...(operational_impact !== app.operational_impact && {
+            operational_impact,
+          }),
+          ...(finalApp.env !== app.env && { env: finalApp.env }),
+          ...(finalApp.main_site !== app.main_site && {
+            main_site: finalApp.main_site,
+          }),
+          ...(finalApp.recovery !== app.recovery && {
+            recovery: finalApp.recovery,
+          }),
+          ...(finalApp.platform !== app.platform && {
+            platform: finalApp.platform,
+          }),
+        };
+
+        // Only call editApp if there are changes
+        if (Object.keys(changes).length > 0) editApp({ changes, id: app.id });
+      } // Close the form when finished
+      handleClose(e);
+    } else
+      toast.error("שדות חובה חסרים", {
+        position: "top-center",
+        richColors: true,
+        className: "toast-rtl",
       });
-    } else if (app.id && app.id > 0) {
-      // Create a changes object, which has all the fields that have been changed
-      const changes = {
-        ...(name !== app.name && { name }),
-        ...(description !== app.description && {
-          description: description === "" ? null : description,
-        }),
-        ...(operationalImpact !== app.operational_impact && {
-          operational_impact:
-            operationalImpact === "" ? null : operationalImpact,
-        }),
-        ...(env !== app.env && { env }),
-        ...(mainSite !== app.main_site && { main_site: mainSite }),
-        ...(recovery !== app.recovery && { recovery }),
-        ...(platform !== app.platform && { platform }),
-      };
-
-      // Only call editApp if there are changes
-      if (Object.keys(changes).length > 0) editApp({ changes, id: app.id });
-    }
-
-    // Close the form when finished
-    handleClose(e);
   };
 
   // Handles form delete
@@ -133,38 +140,26 @@ export function ManageAppsForm({
                 dir="rtl"
                 id="appName"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 placeholder="הקלד שם מערכת"
                 className="input-default w-full"
               />
             </div>
             {/* Environment dropdown */}
-            <div className="flex flex-col items-end gap-1 w-[clamp(8rem,33%,16rem)]">
-              <h4 className="font-medium text-sm mr-1">סביבה</h4>
-              <div
-                onClick={() =>
-                  setOpenDropDown((prev) => (prev == "env" ? null : "env"))
-                }
-                className="flex gap-2 justify-start flex-row-reverse input-default cursor-pointer w-full relative"
-              >
-                <button type="button">
-                  <img
-                    src={chevronDown}
-                    className={`${
-                      openDropDown == "env" ? "rotate-180" : "rotate-0"
-                    } transition-all`}
-                    alt=""
-                  />
-                </button>
-                <h1 className="h-6">
-                  {settings.envSettings.find((e) => e.value == env)?.name}
-                </h1>
-                {openDropDown == "env" && (
-                  <Dropdown setValue={setEnv} data={settings.envSettings} />
-                )}
-              </div>
-            </div>
+            <LabelButton
+              dropDownValue="env"
+              values={settings.envSettings}
+              label="סביבה"
+              openDropDown={openDropDown}
+              setOpenDropDown={setOpenDropDown}
+              setType={(value: keyof typeof envEnum) =>
+                setFormData({ ...formData, env: value })
+              }
+              type={formData.env}
+            />
           </div>
           {/* Description textarea */}
           <div className="form-text-div">
@@ -172,8 +167,10 @@ export function ManageAppsForm({
               מהות מערכת
             </label>
             <textarea
-              value={description || ""}
-              onChange={(e) => setDescription(e.target.value)}
+              value={formData.description || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               dir="rtl"
               id="appDesc"
               rows={3}
@@ -187,8 +184,10 @@ export function ManageAppsForm({
               משמעות מבצעית בהשבתה
             </label>
             <textarea
-              value={operationalImpact || ""}
-              onChange={(e) => setOperationalImpact(e.target.value)}
+              value={formData.operational_impact || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, operational_impact: e.target.value })
+              }
               dir="rtl"
               id="appImpact"
               rows={2}
@@ -200,31 +199,40 @@ export function ManageAppsForm({
           <LabelButton
             label="פלטפורמה"
             values={settings.paltformSettings}
-            type={platform}
-            setType={setPlatform}
+            type={formData.platform}
+            setType={(value: keyof typeof PlatformEnum) =>
+              setFormData({ ...formData, platform: value })
+            }
             openDropDown={openDropDown}
             setOpenDropDown={setOpenDropDown}
             dropDownValue="platform"
+            isApp
           />
           {/* Site dropdown */}
           <LabelButton
             label="אתר ראשי"
             values={settings.siteSettings}
-            type={mainSite}
-            setType={setMainSite}
+            type={formData.main_site}
+            setType={(value: keyof typeof SiteEnum) =>
+              setFormData({ ...formData, main_site: value })
+            }
             openDropDown={openDropDown}
             setOpenDropDown={setOpenDropDown}
             dropDownValue="site"
+            isApp
           />
           {/* Recovery dropdown */}
           <LabelButton
             label="שרידות"
             values={settings.recoverySettings}
-            setType={setRecovery}
+            type={formData.recovery}
+            setType={(value: string) =>
+              setFormData({ ...formData, recovery: value })
+            }
             openDropDown={openDropDown}
             setOpenDropDown={setOpenDropDown}
             dropDownValue="recovery"
-            type={recovery}
+            isApp
           />
 
           {/* Submit and Cancel buttons */}
@@ -268,68 +276,5 @@ export function ManageAppsForm({
         </form>
       </motion.div>
     </Backdrop>
-  );
-}
-
-/**
- * Renders an input button component with a label and a dropdown menu.
- *
- * @param label - The label text for the button.
- * @param openDropDown - The value of the currently open dropdown.
- * @param setOpenDropDown - The function to update the state of the open dropdown.
- * @param dropDownValue - The value of the dropdown button.
- * @param type - The current selected value of the dropdown.
- * @param setType - The function to update the state of the selected dropdown value.
- * @param values - The array of dropdown values.
- */
-function LabelButton({
-  label,
-  setOpenDropDown,
-  dropDownValue,
-  openDropDown,
-  type,
-  setType,
-  values,
-}: {
-  label: string;
-  openDropDown: string | null;
-  setOpenDropDown: React.Dispatch<React.SetStateAction<string | null>>;
-  dropDownValue: string;
-  type: string | null | undefined;
-  setType: any;
-  values: ({ value: null; name: string } | { value: string; name: string })[];
-}) {
-  return (
-    // The container for the label button and dropdown menu
-    <div className="flex justify-between w-[clamp(250px,60%,400px)] flex-row-reverse items-center">
-      {/* The label text */}
-      <h1 className="font-medium text-sm">{label}</h1>
-      {/* The dropdown button */}
-      <h1
-        onClick={() =>
-          setOpenDropDown((prev) =>
-            prev == dropDownValue ? null : dropDownValue
-          )
-        }
-        className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-border rounded-md w-40 flex-row-reverse relative"
-      >
-        <button type="button">
-          {/* The dropdown icon */}
-          <img
-            className={`${
-              openDropDown == dropDownValue ? "rotate-180" : "rotate-0"
-            } transition-all`}
-            src={chevronDown}
-            alt=""
-          />
-        </button>
-        {/* The selected dropdown value */}
-        {values.find((r) => r.value == type)?.name}
-        {/* Render the dropdown menu if it is open */}
-        {openDropDown == dropDownValue && (
-          <Dropdown setValue={setType} data={values} />
-        )}
-      </h1>
-    </div>
   );
 }

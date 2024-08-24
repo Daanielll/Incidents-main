@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 /**
  * Backdrop component that displays a semi-transparent overlay on top of other elements. The component is used as a background to pop up modals.
- * It takes in children components and a click handler function.
  *
  * @param children - The components to be displayed on top of the backdrop
  * @param onClick - The click handler function

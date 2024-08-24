@@ -3,6 +3,18 @@ import { Dropdown } from "../../Dropdown";
 import chevronDown from "../../../assets/chevronDownIcon.svg";
 import { useState } from "react";
 import searchIcon from "../../../assets/searchIcon.svg";
+
+/**
+ * A reusable dropdown component with a label, and a button which opens the dropdown menu.
+ *
+ * @param label - The label to display above the button.
+ * @param openDropDown - The value of the currently open dropdown.
+ * @param setOpenDropDown - The function to update the state of the opened dropdown.
+ * @param dropDownValue - The value of the dropdown button at which the dropdown should open.
+ * @param type - The current selected value of the dropdown.
+ * @param setType - The function to update the state of the selected dropdown value.
+ * @param values - The array of dropdown values.
+ */
 export function LabelButton({
   label,
   setOpenDropDown,
@@ -11,6 +23,7 @@ export function LabelButton({
   type,
   setType,
   values,
+  isApp = false,
 }: {
   label: string;
   openDropDown: string | null;
@@ -19,10 +32,17 @@ export function LabelButton({
   type: string | null | undefined;
   setType: any;
   values: ({ value: null; name: string } | { value: string; name: string })[];
+  isApp?: boolean;
 }) {
   return (
     // The container for the label button and dropdown menu
-    <div className="flex flex-col items-end gap-1 flex-1">
+    <div
+      className={`flex ${
+        isApp
+          ? "justify-between w-[clamp(250px,60%,400px)] flex-row-reverse items-center"
+          : "flex-col items-end gap-1 flex-1"
+      } `}
+    >
       {/* The label text */}
       <h4 dir="rtl" className="font-medium text-sm mr-1">
         {label}
@@ -35,28 +55,50 @@ export function LabelButton({
             prev == dropDownValue ? null : dropDownValue
           );
         }}
-        className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-border rounded-md w-full flex-row-reverse relative"
+        className={`flex items-center gap-2 cursor-pointer px-3 py-2 border border-border rounded-md flex-row-reverse relative ${
+          isApp ? "w-40" : "w-full"
+        }`}
       >
         {/* The dropdown icon */}
-        <img
-          draggable={false}
-          className={`${
-            openDropDown == dropDownValue ? "rotate-180" : "rotate-0"
-          } transition-all select-none`}
-          src={chevronDown}
-          alt=""
-        />
+        <button type="button">
+          <img
+            draggable={false}
+            className={`${
+              openDropDown == dropDownValue ? "rotate-180" : "rotate-0"
+            } transition-all`}
+            src={chevronDown}
+            alt=""
+          />
+        </button>
+
         {/* The selected dropdown value */}
         {values.find((r) => r.value == type)?.name}
         {/* Render the dropdown menu if it is open */}
         {openDropDown == dropDownValue && (
-          <Dropdown setValue={setType} data={values} />
+          <Dropdown
+            setValue={setType}
+            data={values}
+            handleClose={() => {
+              setOpenDropDown(null);
+            }}
+          />
         )}
       </h1>
     </div>
   );
 }
 
+/**
+ * A reusable chips component for selecting applications.
+ *
+ * @param label - The label to display above the dropdown.
+ * @param apps - The list of applications to display in the dropdown.
+ * @param value - The currently selected applications.
+ * @param setValue - The function to update the selected applications.
+ * @param visible - The current visibility state of the dropdown.
+ * @param setVisible - The function to set the visibility of the dropdown.
+ * @param dropDownValue - The value of the dropdown button at which the dropdown should open.
+ */
 export function LabelApps({
   label,
   apps,
@@ -164,34 +206,15 @@ export function LabelApps({
   );
 }
 
-export function LabelText({
-  label,
-  placeholder,
-  value,
-  setValue,
-}: {
-  label: string;
-  placeholder: string;
-  value: string;
-  setValue: (e: any) => void;
-}) {
-  return (
-    <div className="form-text-div flex-1">
-      <label className="font-medium text-sm mr-1" htmlFor={label}>
-        {label}
-      </label>
-      <textarea
-        dir="rtl"
-        id={label}
-        value={value}
-        onChange={setValue}
-        placeholder={placeholder}
-        className="input-default w-full resize-none"
-        rows={3}
-      />
-    </div>
-  );
-}
+/**
+ * A reusable form section component with a label and input.
+ *
+ * @param label - The text to display as the label.
+ * @param type - The type of input to render (e.g. "text", "textarea").
+ * @param placeholder - The placeholder text to display in the input.
+ * @param value - The value of the input.
+ * @param setValue - The function to update the input value.
+ */
 export function LabelInput({
   label,
   type = "text",
@@ -202,23 +225,49 @@ export function LabelInput({
   label: string;
   type?: string;
   placeholder?: string;
-  value: string | null;
+  value: string | null | Date;
   setValue: (e: any) => void;
 }) {
+  const inputValue =
+    value instanceof Date
+      ? value
+          .toLocaleString("sv-SE", {
+            timeZone: "Asia/Jerusalem",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+          .replace(" ", "T")
+      : value || "";
+
   return (
     <div className="form-text-div flex-1">
       <label dir="rtl" className="font-medium text-sm mr-1" htmlFor={label}>
         {label}
       </label>
-      <input
-        dir="rtl"
-        id={label}
-        type={type}
-        value={value || ""}
-        onChange={setValue}
-        placeholder={placeholder}
-        className="input-default w-full"
-      />
+      {type !== "textarea" ? (
+        <input
+          dir="rtl"
+          id={label}
+          type={type}
+          value={inputValue}
+          onChange={setValue}
+          placeholder={placeholder}
+          className="input-default w-full"
+        />
+      ) : (
+        <textarea
+          dir="rtl"
+          id={label}
+          value={typeof value === "string" ? value : ""}
+          onChange={setValue}
+          placeholder={placeholder}
+          className="input-default w-full resize-none"
+          rows={3}
+        />
+      )}
     </div>
   );
 }

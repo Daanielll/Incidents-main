@@ -1,4 +1,3 @@
-import { AnimatePresence } from "framer-motion";
 import {
   envEnum,
   ImpactEnum,
@@ -7,123 +6,115 @@ import {
   ReporterEnum,
   SiteEnum,
   StatusEnum,
-} from "../../types/IncidentType";
-import { ConfirmationModal } from "../ConfirmationModal";
+} from "../../../types/IncidentType";
 import { motion } from "framer-motion";
-import { Backdrop } from "../Backdrop";
-import crossIcon from "../../assets/crossIcon.svg";
-import trashIcon from "../../assets/trashIcon.svg";
-import { useState } from "react";
-import settings from "../../types/AppSettings";
-import { AppType } from "../../types/AppType";
-import {
-  LabelApps,
-  LabelButton,
-  LabelInput,
-  LabelText,
-} from "./incidentForm/Sections";
-import { useNewIncident } from "../../hooks/useNewIncident";
+import { Backdrop } from "../../Backdrop";
+import crossIcon from "../../../assets/crossIcon.svg";
+import { useEffect, useState } from "react";
+import settings from "../../../types/AppSettings";
+import { LabelApps, LabelButton, LabelInput } from "./Sections";
+import { useNewIncident } from "../../../hooks/useNewIncident";
 import { toast } from "sonner";
-import { useAllApps } from "../../hooks/Apps/useAllApps";
+import { useAllApps } from "../../../hooks/Apps/useAllApps";
+import { useUpdateIncident } from "../../../hooks/useUpdateIncident";
+import { AppType } from "../../../types/AppType";
 
 type Props = {
-  handleClose: (e: React.MouseEvent) => void;
+  handleClose: (e: React.MouseEvent | React.FormEvent) => void;
   incident: IncidentType;
 };
 
+/**
+ * Form copnent for creating or updating an incident.
+ * @param handleCloste - The function to close the form.
+ * @param incident - The incident object.
+ */
 export default function ManageIncidentForm({ handleClose, incident }: Props) {
+  // Get all the apps (for the apps dropdown)
   const apps = useAllApps().data;
+  // Use the hooks to update and create new incidents
   const newIncident = useNewIncident();
+  const updateIncident = useUpdateIncident();
+  // State for the form - excluding the apps
   const [formData, setFormData] = useState(incident);
+  // State for the apps
   const [selectedApps, setSelectedApps] = useState<number[]>([]);
-
-  // if (typeof formData.start_date === "string" && formData.start_date !== "")
-  //   setFormData((prev) => {
-  //     return { ...prev, start_date: new Date(prev.start_date) };
-  //   });
-  // if (typeof formData.end_date === "string" && formData.end_date !== "")
-  //   setFormData((prev) => {
-  //     return { ...prev, end_date: formData.end_date ? new Date(prev.end_date) : null };
-  //   });
-  if (formData.start_date.length === 24)
-    setFormData((prev) => {
-      return { ...prev, start_date: prev.start_date.slice(0, 16) };
-    });
-  if (formData.end_date && formData.end_date.length === 24)
-    setFormData((prev) => {
-      return { ...prev, end_date: prev.end_date.slice(0, 16) };
-    });
-
-  if (selectedApps.length === 0)
-    formData.IncidentApp.map((app) =>
-      setSelectedApps((prev) => [...prev, app.app.id!])
-    );
-
+  // State for the impacted apps
   const [selectedImpacted, setSelectedImpacted] = useState<number[]>([]);
-  if (selectedImpacted.length === 0)
-    formData.IncidentImpact.map((app) =>
-      setSelectedImpacted((prev) => [...prev, app.app.id!])
-    );
+  // Update the apps states to the incident's apps IDs
+  useEffect(() => {
+    setSelectedApps(incident.IncidentApp.map((app) => app.app.id!));
+    setSelectedImpacted(incident.IncidentImpact.map((app) => app.app.id!));
+  }, []);
+  // State to control which dropdown is active
   const [openDropdown, setOpenDropDown] = useState<string | null>(null);
-
+  // Set the form's required fields
+  const requiredFields = [
+    "start_date",
+    "title",
+    "description",
+    "operational_impact",
+    "technical_impact",
+    "platform",
+    "env",
+    "site",
+    "status",
+    "reported_by",
+  ];
+  // Handles form submission
   const handleSubmit = (e: React.FormEvent) => {
-    // console.log(incident["IncidentImpact"]);
-
-    // for (const key of Object.keys(incident)) {
-    //   console.log("key: " + incident[`${key}`]);
-    // }
-    // const changes = {for (const [key, value] of Object.entries(formData)) {
-    //   (incident[key] !== value && {...key: value})
-    // }}
-
-    const changes = Object.entries(formData).reduce((all, [key, value]) => {
-      if (incident[key] !== value) {
-        if (key === "start_date" || key === "end_date") {
-          console.log(incident[key].slice(0, 16) == value);
-        }
-        all[key] = value;
-      }
-      return all;
-    }, {});
-    // console.log(changes);
     e.preventDefault();
-    return;
+
+    // Get all the changes if the user is editing an existing incident
+    const changes = getFormChanges(incident, formData);
+    // Check if the apps or impacted apps have changed - returns boolean
+    const appsChanged = getAppChanges(incident.IncidentApp, selectedApps);
+    const impactedAppsChanged = getAppChanges(
+      incident.IncidentImpact,
+      selectedImpacted
+    );
+
+    // Split the data to only send the relevent data
     const {
       IncidentApp,
       IncidentImpact,
-      start_date,
-      end_date,
       description,
       operational_impact,
+      IncidentActivity,
       ...data
     } = formData;
-
-    const inc = {
+    // Create the finalIncident object, which will be sent to the server
+    const finalIncident = {
       ...data,
-      ...{ start_date: new Date(start_date) },
-      ...(end_date && { end_date: new Date(end_date) }),
-      ...{ apps: selectedApps },
-      ...{ impacted_apps: selectedImpacted },
+      apps: selectedApps,
+      impacted_apps: selectedImpacted,
       ...(description.trim() !== "" && { description: description }),
       ...(operational_impact.trim() !== "" && {
         operational_impact: operational_impact,
       }),
     };
-    if (
-      inc.apps[0] &&
-      inc.title &&
-      inc.description &&
-      inc.start_date &&
-      inc.platform &&
-      inc.operational_impact &&
-      inc.platform &&
-      inc.reported_by &&
-      inc.site &&
-      inc.status &&
-      inc.technical_impact &&
-      inc.env
-    ) {
-      newIncident(inc);
+
+    // Check if required fields are missing before sending the request
+    const isValid =
+      requiredFields.every(
+        (key) => finalIncident[key as keyof typeof finalIncident] != null
+      ) && finalIncident.apps.length > 0;
+
+    if (isValid) {
+      // If the user is creating a new incident, use the useNewIncident hook
+      if (!incident.id) newIncident(finalIncident);
+      // If the user is editing an existing incident, use the useUpdateIncident hook
+      else {
+        if (Object.keys(changes)[0] || appsChanged || impactedAppsChanged)
+          updateIncident({
+            changes: {
+              ...changes,
+              ...(appsChanged && { apps: selectedApps }),
+              ...(impactedAppsChanged && { impacted_apps: selectedImpacted }),
+            },
+            id: incident.id!,
+          });
+      }
       handleClose(e);
     } else
       toast.error("שדות חובה חסרים", {
@@ -159,6 +150,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
         }}
       >
         <div className="flex justify-between flex-row-reverse w-full border-b border-border py-4 px-6">
+          {/* Header */}
           <h1 className="font-medium text-2xl">
             {!incident.id ? "הוסף אירוע" : "ערוך אירוע"}
           </h1>
@@ -185,9 +177,10 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                   setFormData({ ...formData, title: e.target.value })
                 }
               />
-              <LabelText
+              <LabelInput
                 label="* תיאור תקלה"
                 placeholder="הוסף תיאור תקלה"
+                type="textarea"
                 value={formData.description}
                 setValue={(e) =>
                   setFormData({ ...formData, description: e.target.value })
@@ -293,7 +286,8 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                 }}
                 dropDownValue="impact"
               />
-              <LabelText
+              <LabelInput
+                type="textarea"
                 label="* משמעות מבצעית"
                 placeholder="הוסף משמעות מבצעית"
                 value={formData.operational_impact}
@@ -350,17 +344,24 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                 label="זמן תחילת אירוע *"
                 type="datetime-local"
                 value={formData.start_date}
-                setValue={(e) =>
-                  setFormData({ ...formData, start_date: e.target.value })
-                }
+                setValue={(e) => {
+                  setFormData({
+                    ...formData,
+                    start_date: new Date(e.target.value),
+                  });
+                }}
               />
               <LabelInput
                 label="זמן סיום אירוע"
                 type="datetime-local"
                 value={formData.end_date || ""}
-                setValue={(e) =>
-                  setFormData({ ...formData, end_date: e.target.value })
-                }
+                setValue={(e) => {
+                  const d = e.target.value;
+                  setFormData({
+                    ...formData,
+                    end_date: d !== "" ? new Date(d) : null,
+                  });
+                }}
               />
 
               <LabelButton
@@ -384,37 +385,55 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                 type="submit"
                 className="px-5 py-2 bg-primary text-white-color rounded-md"
               >
-                שמור מערכת
+                שמור אירוע
               </button>
               <button
+                type="button"
                 onClick={handleClose}
                 className="px-5 py-2 bg-white-color text-secondary-text box-border border border-border rounded-md"
               >
                 ביטול
               </button>
             </div>
-            {incident.id && (
-              <button
-                type="button"
-                className="px-5 py-2 rounded-md flex gap-2 bg-red-50 text-secondary-red items-center"
-              >
-                מחיקה
-                <img src={trashIcon} alt="" />
-              </button>
-            )}
           </div>
-          {/* <AnimatePresence mode="wait">
-            {isDeleting && (
-              <ConfirmationModal
-                title="מחיקת מערכת"
-                text="האם אתה בטוח שאתה רוצה למחוק את המערכת? פעולה זו היא בלתי הפיכה"
-                // handleSubmit={handleDelete}
-                // handleClose={() => setIsDeleting(false)}
-              />
-            )}
-          </AnimatePresence> */}
         </form>
       </motion.div>
     </Backdrop>
+  );
+}
+
+/**
+ * A function that returns an object with all the form changes
+ * @param incident - The incident object
+ * @param formData - The form data
+ */
+function getFormChanges(incident: IncidentType, formData: IncidentType) {
+  const changes = Object.entries(formData).reduce((all, [key, value]) => {
+    if (incident[key as keyof IncidentType] !== value) {
+      if (key === "start_date" || key === "end_date") {
+        if (
+          value.toISOString().slice(0, 16) !==
+          incident[key]?.toISOString().slice(0, 16)
+        )
+          all[key] = value;
+      } else all[key] = value;
+    }
+    return all;
+  }, {} as { [key: string]: any });
+  return changes;
+}
+
+/**
+ * A funcion that returns true if the apps or impacted apps have changed
+ * @param incidentApps - The incident apps
+ * @param selectedApps - The selected apps
+ */
+function getAppChanges(
+  incidentApps: { app: AppType }[],
+  selectedApps: number[]
+) {
+  return (
+    incidentApps.length !== selectedApps.length ||
+    incidentApps.some((app) => !selectedApps.includes(app.app.id!))
   );
 }

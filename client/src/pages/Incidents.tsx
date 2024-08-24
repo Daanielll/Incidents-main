@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import IncidentsTable from "../components/Incidents/IncidentsTable";
 import { useIncidentData } from "../hooks/useIncidentData";
 import { Outlet, useSearchParams } from "react-router-dom";
-import ManageIncidentForm from "../components/Incidents/ManageIncidentForm";
+import ManageIncidentForm from "../components/Incidents/incidentForm/ManageIncidentForm";
 import { AnimatePresence } from "framer-motion";
 import { ImpactEnum, StatusEnum } from "../types/IncidentType";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 /**
- * Incidents component.
- * Fetching incidents data, which is then passed to the IncidentTable component to render the table.
+ * Fetches incidents data, which is then passed to the IncidentTable component to render the table.
  */
 
 export default function Incidents() {
@@ -60,14 +59,16 @@ export default function Incidents() {
       cell: (props: any) => {
         if (!props.getValue())
           return <p className="text-secondary-text">בתהליך</p>;
-        const date = new Date(props.getValue());
         return (
           <h1 dir="rtl">
-            {date.toLocaleDateString("he-IL", {
+            {props.getValue().toLocaleDateString("he-IL", {
               day: "numeric",
               month: "short",
-              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+              ...(props.getValue().getFullYear() !== 2024
+                ? { year: "2-digit" }
+                : {}),
             })}
+            <div></div>
           </h1>
         );
       },
@@ -76,13 +77,14 @@ export default function Incidents() {
       accessorKey: "start_date",
       header: "תחילת אירוע",
       cell: (props: any) => {
-        const date = new Date(props.getValue());
         return (
           <h1 dir="rtl">
-            {date.toLocaleDateString("he-IL", {
+            {props.getValue().toLocaleDateString("he-IL", {
               day: "numeric",
               month: "short",
-              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+              ...(props.getValue().getFullYear() !== 2024
+                ? { year: "2-digit" }
+                : {}),
             })}
           </h1>
         );
@@ -94,12 +96,20 @@ export default function Incidents() {
       cell: (props: any) => {
         if (props.getValue().length < 1) return <p>אין</p>;
         return (
-          <div className="flex gap-2 w-full justify-center">
-            {props.getValue().map((app: any) => (
-              <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
-                {app.app.name}
-              </h1>
-            ))}
+          <div className="flex gap-2 w-full justify-center flex-row-reverse">
+            {props.getValue().map((app: any, index: number) => {
+              if (index > 2) return;
+              if (index === 2)
+                return <p className="px-2 py-1 bg-light rounded-md">...</p>;
+              return (
+                <h1
+                  className="px-2 py-1 bg-light rounded-md"
+                  key={app.app.name}
+                >
+                  {app.app.name}
+                </h1>
+              );
+            })}
           </div>
         );
       },
@@ -108,12 +118,17 @@ export default function Incidents() {
     {
       accessorKey: "IncidentApp",
       cell: (props: any) => (
-        <div className="flex gap-2 w-full justify-center">
-          {props.getValue().map((app: any) => (
-            <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
-              {app.app.name}
-            </h1>
-          ))}
+        <div className="flex gap-2 w-full justify-center flex-row-reverse">
+          {props.getValue().map((app: any, index: number) => {
+            if (index > 2) return;
+            if (index === 2)
+              return <p className="px-2 py-1 bg-light rounded-md">...</p>;
+            return (
+              <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
+                {app.app.name}
+              </h1>
+            );
+          })}
         </div>
       ),
       header: "מערכות",
@@ -147,6 +162,7 @@ export default function Incidents() {
     onPaginationChange: setPagination,
   });
   // if (apps.isLoading || incidents.isLoading) return <h1>Loading</h1>;
+  // console.log(incidents);
   return (
     <>
       <div className="flex flex-col gap-3 w-full min-h-full items-end text-text">
@@ -245,10 +261,10 @@ export default function Incidents() {
               omer_sent: false,
               monitored: false,
               technical_impact: null,
-              start_date: "",
+              start_date: new Date(),
             }}
           />
-        )}{" "}
+        )}
       </AnimatePresence>
 
       <Outlet />

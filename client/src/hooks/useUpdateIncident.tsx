@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 
-export function useUpdateIncident(id: number) {
+export function useUpdateIncident() {
   const [searchParams, setSearchParms] = useSearchParams();
   const pagination = {
     pageSize: Number(searchParams.get("size")) || 10,
@@ -11,10 +11,10 @@ export function useUpdateIncident(id: number) {
   };
   const queryClient = useQueryClient();
   const { mutateAsync } = useMutation({
-    mutationFn: async (incident: any) => {
-      const response = await axios.post(
+    mutationFn: async ({ changes, id }: { changes: Object; id: number }) => {
+      const response = await axios.patch(
         `http://localhost:3500/incidents/${id}`,
-        incident,
+        changes,
         {
           withCredentials: true,
         }
@@ -30,9 +30,12 @@ export function useUpdateIncident(id: number) {
         });
       }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ["incidents", pagination.pageIndex, pagination.pageSize],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["incidents", data.incident.id],
       });
       toast.success("אירוע עודכן בהצלחה", {
         position: "top-center",
