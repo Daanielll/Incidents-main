@@ -2,36 +2,66 @@ import { useEffect, useState } from "react";
 import IncidentsTable from "../components/Incidents/IncidentsTable";
 import { useIncidentData } from "../hooks/useIncidentData";
 import { Outlet, useSearchParams } from "react-router-dom";
-import ManageIncidentForm from "../components/Incidents/ManageIncidentForm";
+import ManageIncidentForm from "../components/Incidents/incidentForm/ManageIncidentForm";
 import { AnimatePresence } from "framer-motion";
 import { ImpactEnum, StatusEnum } from "../types/IncidentType";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { useDebounce } from "../hooks/useDebounce";
+import searchIcon from "../assets/searchIcon.svg";
 
 /**
- * Incidents component.
- * Fetching incidents data, which is then passed to the IncidentTable component to render the table.
+ * Fetches incidents data, which is then passed to the IncidentTable component to render the table.
  */
 
 export default function Incidents() {
+  // Get search params and add the page and limit to a pagination state
   const [searchParams, setSearchParms] = useSearchParams();
   const [pagination, setPagination] = useState({
     pageSize: Number(searchParams.get("limit")) || 10,
     pageIndex: Number(searchParams.get("page")) || 0,
   });
+  // Get search query from the search params and create a debounced var for it
+  const [search, setSearch] = useState(searchParams.get("search") || "");
+  const debouncedSearch = useDebounce(search);
+  // Change the URL when pagination state change
   useEffect(() => {
     setSearchParms({
-      limit: pagination.pageSize.toString(),
-      page: pagination.pageIndex.toString(),
+      ...(pagination.pageSize !== 10 && {
+        limit: pagination.pageSize.toString(),
+      }),
+      ...(pagination.pageIndex !== 0 && {
+        page: pagination.pageIndex.toString(),
+      }),
+      ...(search !== "" && {
+        search: search,
+      }),
     });
   }, [pagination]);
+  // Change the URL when debounced search change
+  useEffect(() => {
+    setPagination({
+      ...pagination,
+      pageIndex: 0,
+    });
+    setSearchParms({
+      ...searchParams,
+      ...(search !== "" && {
+        search,
+      }),
+    });
+  }, [debouncedSearch]);
 
-  const incidents = useIncidentData(pagination.pageSize, pagination.pageIndex);
+  // Get incident data
+  const incidents = useIncidentData();
+  // State to control if new incident form is shown
   const [showForm, setShowForm] = useState(false);
+  // Object to control status colors for the status column
   const statusColor = {
     green: "bg-secondary-green text-secondary-green",
     yellow: "bg-secondary-yellow text-secondary-yellow",
     red: "bg-secondary-red text-secondary-red",
   };
+  // Manage the table's columns
   const columns = [
     {
       accessorKey: "status",
@@ -60,14 +90,16 @@ export default function Incidents() {
       cell: (props: any) => {
         if (!props.getValue())
           return <p className="text-secondary-text">בתהליך</p>;
-        const date = new Date(props.getValue());
         return (
           <h1 dir="rtl">
-            {date.toLocaleDateString("he-IL", {
+            {props.getValue().toLocaleDateString("he-IL", {
               day: "numeric",
               month: "short",
-              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+              ...(props.getValue().getFullYear() !== 2024
+                ? { year: "2-digit" }
+                : {}),
             })}
+            <div></div>
           </h1>
         );
       },
@@ -76,13 +108,14 @@ export default function Incidents() {
       accessorKey: "start_date",
       header: "תחילת אירוע",
       cell: (props: any) => {
-        const date = new Date(props.getValue());
         return (
           <h1 dir="rtl">
-            {date.toLocaleDateString("he-IL", {
+            {props.getValue().toLocaleDateString("he-IL", {
               day: "numeric",
               month: "short",
-              ...(date.getFullYear() !== 2024 ? { year: "2-digit" } : {}),
+              ...(props.getValue().getFullYear() !== 2024
+                ? { year: "2-digit" }
+                : {}),
             })}
           </h1>
         );
@@ -94,12 +127,24 @@ export default function Incidents() {
       cell: (props: any) => {
         if (props.getValue().length < 1) return <p>אין</p>;
         return (
-          <div className="flex gap-2 w-full justify-center">
-            {props.getValue().map((app: any) => (
-              <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
-                {app.app.name}
-              </h1>
-            ))}
+          <div className="flex gap-2 w-full justify-center flex-row-reverse">
+            {props.getValue().map((app: any, index: number) => {
+              if (index > 2) return;
+              if (index === 2)
+                return (
+                  <p key="ellipsis" className="px-2 py-1 bg-light rounded-md">
+                    ...
+                  </p>
+                );
+              return (
+                <h1
+                  className="px-2 py-1 bg-light rounded-md"
+                  key={app.app.name}
+                >
+                  {app.app.name}
+                </h1>
+              );
+            })}
           </div>
         );
       },
@@ -108,12 +153,21 @@ export default function Incidents() {
     {
       accessorKey: "IncidentApp",
       cell: (props: any) => (
-        <div className="flex gap-2 w-full justify-center">
-          {props.getValue().map((app: any) => (
-            <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
-              {app.app.name}
-            </h1>
-          ))}
+        <div className="flex gap-2 w-full justify-center flex-row-reverse">
+          {props.getValue().map((app: any, index: number) => {
+            if (index > 2) return;
+            if (index === 2)
+              return (
+                <p key="ellipsis" className="px-2 py-1 bg-light rounded-md">
+                  ...
+                </p>
+              );
+            return (
+              <h1 className="px-2 py-1 bg-light rounded-md" key={app.app.name}>
+                {app.app.name}
+              </h1>
+            );
+          })}
         </div>
       ),
       header: "מערכות",
@@ -134,7 +188,7 @@ export default function Incidents() {
       header: "שם אירוע",
     },
   ];
-
+  // Create a table instance
   const table = useReactTable({
     columns,
     data: incidents.data?.incidents || [],
@@ -147,6 +201,7 @@ export default function Incidents() {
     onPaginationChange: setPagination,
   });
   // if (apps.isLoading || incidents.isLoading) return <h1>Loading</h1>;
+  // console.log(incidents);
   return (
     <>
       <div className="flex flex-col gap-3 w-full min-h-full items-end text-text">
@@ -159,6 +214,22 @@ export default function Incidents() {
             >
               חדש +
             </button>
+            <div className="relative w-80">
+              <input
+                dir="rtl"
+                className="input-default-np py-2 pl-3 pr-8"
+                placeholder="סנן לפי שם"
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <img
+                draggable="false"
+                className="absolute top-1/2 -translate-y-1/2 right-2 select-none"
+                src={searchIcon}
+                alt=""
+              />
+            </div>
           </div>
           <div className="flex-1 flex flex-col justify-between">
             <div className="flex-1">
@@ -245,10 +316,10 @@ export default function Incidents() {
               omer_sent: false,
               monitored: false,
               technical_impact: null,
-              start_date: "",
+              start_date: new Date(),
             }}
           />
-        )}{" "}
+        )}
       </AnimatePresence>
 
       <Outlet />

@@ -168,7 +168,13 @@ const updateIncident = async (req, res) => {
 };
 
 const getAllIncidents = async (req, res) => {
-  const { page = 0, limit = 10 } = req.query;
+  const { page = 0, limit = 10, search = "" } = req.query;
+  const searchConditions = {
+    OR: [
+      { title: { contains: search } },
+      { description: { contains: search } },
+    ],
+  };
   try {
     const incidents = await prisma.incident.findMany({
       select: {
@@ -183,11 +189,12 @@ const getAllIncidents = async (req, res) => {
         title: true,
         id: true,
       },
+      where: searchConditions,
       skip: Number(page) * Number(limit),
       take: Number(limit),
       orderBy: { start_date: "desc" },
     });
-    const count = await prisma.incident.count();
+    const count = await prisma.incident.count({ where: searchConditions });
     return res.status(201).json({ incidents, count });
   } catch (error) {
     console.log(error);

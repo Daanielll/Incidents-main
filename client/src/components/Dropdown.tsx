@@ -7,9 +7,11 @@
 export function Dropdown({
   data,
   setValue,
+  handleClose,
 }: {
   data: { name: string; value: string | null }[];
   setValue: (e: any) => void;
+  handleClose: () => void;
 }) {
   return (
     // The dropdown container
@@ -21,6 +23,7 @@ export function Dropdown({
           onClick={(e) => {
             e.stopPropagation();
             setValue(item.value);
+            handleClose();
           }}
           key={item.value}
           className=" w-full px-3 py-2 text-right hover:bg-light cursor-pointer"

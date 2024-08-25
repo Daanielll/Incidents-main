@@ -33,7 +33,7 @@ export default function IncidentsTable({
       <tbody>
         {table.getCoreRowModel().rows.map((row: any) => (
           <tr
-            className="cursor-pointer hover:bg-light"
+            className="cursor-pointer hover:bg-[#F9F9F9]"
             onClick={() => {
               const queryParams = new URLSearchParams(location.search);
               navigate(

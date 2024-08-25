@@ -1,16 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import useSearchQuery from "./useSearchQuery";
 
 export function useNewIncident() {
-  const [searchParams, setSearchParms] = useSearchParams();
-  const queryParams = new URLSearchParams(location.search);
-  const navigate = useNavigate();
-  const pagination = {
-    pageSize: Number(searchParams.get("size")) || 10,
-    pageIndex: Number(searchParams.get("page")) || 0,
-  };
+  const searchParams = useSearchQuery();
   const queryClient = useQueryClient();
   const { mutateAsync } = useMutation({
     mutationFn: async (incident: any) => {
@@ -34,9 +28,8 @@ export function useNewIncident() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["incidents", pagination.pageIndex, pagination.pageSize],
+        queryKey: ["incidents", searchParams],
       });
-      navigate(`/incidents?${queryParams.toString()}`);
 
       toast.success("אירוע נוצר בהצלחה", {
         position: "top-center",

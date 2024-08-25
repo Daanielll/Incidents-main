@@ -2,7 +2,7 @@ import { AppType } from "../types/AppType";
 import { envEnum, SiteEnum } from "../types/IncidentType";
 
 /**
- * This function is used to display an app banner.
+ * Renders a banner with an app's details.
  * @param app - The app object to be displayed.
  */
 export default function AppBanner({ app }: { app: AppType }) {
