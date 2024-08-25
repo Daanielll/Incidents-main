@@ -30,6 +30,7 @@ export default function IncidentsTable({
           ))}
         </tr>
       </thead>
+
       <tbody>
         {table.getCoreRowModel().rows.map((row: any) => (
           <tr

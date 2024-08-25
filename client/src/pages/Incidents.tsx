@@ -201,7 +201,6 @@ export default function Incidents() {
     onPaginationChange: setPagination,
   });
   // if (apps.isLoading || incidents.isLoading) return <h1>Loading</h1>;
-  // console.log(incidents);
   return (
     <>
       <div className="flex flex-col gap-3 w-full min-h-full items-end text-text">
