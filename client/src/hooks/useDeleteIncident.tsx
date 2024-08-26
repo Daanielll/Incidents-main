@@ -1,18 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import useSearchQuery from "./useSearchQuery";
 
 export function useDeleteIncident() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const [searchParams, setSearchParms] = useSearchParams();
-  const pagination = {
-    pageSize: Number(searchParams.get("size")) || 10,
-    pageIndex: Number(searchParams.get("page")) || 0,
-  };
+  const searchParams = useSearchQuery();
+
   const { mutateAsync } = useMutation({
     mutationFn: async (id: number) => {
       const response = await axios.delete(
@@ -34,7 +32,7 @@ export function useDeleteIncident() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["incidents", pagination.pageIndex, pagination.pageSize],
+        queryKey: ["incidents", searchParams],
       });
       navigate(`/incidents?${queryParams.toString()}`);
       toast.success("מערכת נמחקה בהצלחה", {

@@ -411,11 +411,11 @@ function getFormChanges(incident: IncidentType, formData: IncidentType) {
   const changes = Object.entries(formData).reduce((all, [key, value]) => {
     if (incident[key as keyof IncidentType] !== value) {
       if (key === "start_date" || key === "end_date") {
-        if (
-          value.toISOString().slice(0, 16) !==
-          incident[key]?.toISOString().slice(0, 16)
-        )
-          all[key] = value;
+        const dateValue = value ? value.toISOString().slice(0, 16) : null;
+        const incidentDateValue = incident[key]
+          ? incident[key]?.toISOString().slice(0, 16)
+          : null;
+        if (dateValue !== incidentDateValue) all[key] = value;
       } else all[key] = value;
     }
     return all;

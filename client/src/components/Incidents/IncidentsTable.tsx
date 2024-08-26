@@ -21,7 +21,7 @@ export default function IncidentsTable({
 
   return (
     <table className="w-full text-text">
-      <thead className="bg-light border-y-2 border-border px-8">
+      <thead className="bg-light border-y-2 border-border px-8 sticky top-0">
         <tr>
           {table.getAllColumns().map((columns: any) => (
             <th className="text-center p-3 font-medium" key={columns.id}>
