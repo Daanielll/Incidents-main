@@ -5,10 +5,6 @@ import useSearchQuery from "./useSearchQuery";
 
 export function useUpdateIncident() {
   const searchParams = useSearchQuery();
-  const pagination = {
-    pageSize: Number(searchParams.size) || 10,
-    pageIndex: Number(searchParams.page) || 0,
-  };
   const queryClient = useQueryClient();
   const { mutateAsync } = useMutation({
     mutationFn: async ({ changes, id }: { changes: Object; id: number }) => {
