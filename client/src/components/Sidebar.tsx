@@ -6,7 +6,7 @@ import { ManageAppsIcon } from "../assets/ManageAppsIcon";
 
 /**
  * Sidebar component.
- * Renders a sidebar with the logo, a menu with one section for the analysts and one section for the manager, and user information.
+ * Renders a sidebar with the logo, a menu with one section for the hamal and one section for the commander, and user information.
  */
 export function Sidebar() {
   // State to control the sidebar's expand/collapse state
@@ -14,15 +14,15 @@ export function Sidebar() {
   // Get the user object from the auth context
   const { user } = useAuthContext();
   // Menu items for the analysts section
-  const analysts = [
+  const hamal = [
     {
       title: "יומן מבצעים",
       icon: <IncidentIcon />,
       link: "/incidents",
     },
   ];
-  // Menu items for the manager section
-  const manager = [
+  // Menu items for the commander section
+  const commander = [
     {
       title: "ניהול מערכות",
       icon: <ManageAppsIcon />,
@@ -61,15 +61,13 @@ export function Sidebar() {
           <div className="size-10 bg-secondary-green border border-secondary-yellow rounded-full min-w-10" />
         </div>
         <div className="flex flex-col gap-3 mr-[10px] flex-grow w-full overflow-x-hidden items-end">
-          {/* ANALYSTS Items */}
+          {/* HAMAL Items */}
           <div className="h-5 self-end">
             {isExpanded && (
-              <h3 className="text-sm font-medium text-secondary-text">
-                עובדים
-              </h3>
+              <h3 className="text-sm font-medium text-secondary-text">חמ"ל</h3>
             )}
           </div>
-          {analysts.map((item) => (
+          {hamal.map((item) => (
             <NavLink
               to={item.link}
               key={item.title}
@@ -83,8 +81,8 @@ export function Sidebar() {
               {item.icon}
             </NavLink>
           ))}
-          {/* MANAGER Items */}
-          {user.role === "MANAGER" && (
+          {/* COMMANDER Items */}
+          {user.role === "COMMANDER" && (
             <>
               <div className="h-5 self-end flex items-center">
                 {isExpanded && (
@@ -94,7 +92,7 @@ export function Sidebar() {
                 )}
                 {!isExpanded && <div className="h-[2px] w-5 bg-border"></div>}
               </div>
-              {manager.map((item) => (
+              {commander.map((item) => (
                 <NavLink
                   to={item.link}
                   key={item.title}

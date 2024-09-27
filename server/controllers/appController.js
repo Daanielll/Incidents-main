@@ -17,7 +17,7 @@ const createApp = async (req, res) => {
   }
   try {
     const userAdmin = await prisma.user.findUnique({
-      where: { role: "MANAGER", id: userId },
+      where: { role: "COMMANDER", id: userId },
     });
     if (!userAdmin) {
       return res.status(401).json({ error: "אין לך את ההרשאות המתאימות" });
@@ -65,7 +65,7 @@ const updateApp = async (req, res) => {
   }
   try {
     const userAdmin = await prisma.user.findUnique({
-      where: { role: "MANAGER", id: userId },
+      where: { role: "COMMANDER", id: userId },
     });
     if (!userAdmin) {
       return res.status(401).json({ error: "אין לך את ההרשאות המתאימות" });
@@ -95,7 +95,7 @@ const deleteApp = async (req, res) => {
 
   try {
     const userAdmin = await prisma.user.findUnique({
-      where: { role: "MANAGER", id: userId },
+      where: { role: "COMMANDER", id: userId },
     });
     if (!userAdmin) {
       return res.status(401).json({ error: "אין לך את ההרשאות המתאימות" });

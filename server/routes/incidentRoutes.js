@@ -9,9 +9,6 @@ router
   .get(incidentController.getAllIncidents);
 
 router
-  .route("/activity/:incId")
-  .post(authToken, incidentController.createIncidentComment);
-router
   .route("/:incId")
   .get(incidentController.getIncidentById)
   .delete(incidentController.deleteIncident)

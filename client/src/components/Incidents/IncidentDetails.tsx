@@ -1,21 +1,18 @@
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useIncidentDataById } from "../../hooks/useIncidentData";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { useDeleteIncident } from "../../hooks/useDeleteIncident";
+import { ConfirmationModal } from "../ConfirmationModal";
+import ManageIncidentForm from "./ManageIncidentForm";
+import { Backdrop } from "../Backdrop";
 import {
   ImpactEnum,
   PlatformEnum,
   ReporterEnum,
   SiteEnum,
   StatusEnum,
-} from "../../types/IncidentType";
-import { useIncidentDataById } from "../../hooks/useIncidentData";
-import AppBanner from "../AppBanner";
-import { AnimatePresence, motion } from "framer-motion";
-import messageIcon from "../../assets/messageIcon.svg";
-import { useNewMessage } from "../../hooks/useNewMessage";
-import { useState } from "react";
-import { useDeleteIncident } from "../../hooks/useDeleteIncident";
-import { ConfirmationModal } from "../ConfirmationModal";
-import ManageIncidentForm from "./incidentForm/ManageIncidentForm";
-import { Backdrop } from "../Backdrop";
+} from "../../types/Enums";
 
 /**
  * The IncidentDetails component renders the incident details page, including the incident's activity
@@ -29,8 +26,6 @@ export default function IncidentDetails() {
   const deleteIncident = useDeleteIncident();
 
   // Get the new message function from useNewMessage(id) hook, and set the message text state
-  const newMessage = useNewMessage(Number(id));
-  const [messageText, setMessageText] = useState("");
   const [deleteForm, setDeleteForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
 
@@ -67,15 +62,6 @@ export default function IncidentDetails() {
     : ((now.valueOf() - data.start_date.valueOf()) / (1000 * 60 * 60)).toFixed(
         2
       );
-
-  // Handle sending a new message
-  const handleSendMessage = (e: any) => {
-    e.preventDefault();
-    if (messageText !== "") {
-      newMessage(messageText);
-      setMessageText("");
-    }
-  };
 
   // Status color - will be used to have different colors for each status
   const statusColor = {
@@ -219,99 +205,6 @@ export default function IncidentDetails() {
             <h4 className="text-secondary-text">{`אירוע מספר ${data.id}`}</h4>
             <p>{data.description}</p>
             <div className="w-full h-px bg-border"></div>
-            <h4 className="text-secondary-text">מערכות</h4>
-            {data.IncidentApp.map((app) => (
-              <AppBanner key={app.app.id} app={app.app} />
-            ))}
-            <h4 className="text-secondary-text">מערכות מושפעות</h4>
-            {data.IncidentImpact.length > 0 ? (
-              data.IncidentImpact.map((app) => (
-                <AppBanner key={app.app.id} app={app.app} />
-              ))
-            ) : (
-              <h4>אין</h4>
-            )}
-            {/* התקדמות אירוע */}
-
-            <div className="flex flex-col gap-2 w-full flex-1">
-              <h3 dir="rtl" className="text-lg font-medium my-3">
-                התקדמות אירוע
-              </h3>
-              {/* All the messages section */}
-              <div className="h-full flex flex-col justify-between items-end overflow-hidden">
-                <div className="overflow-auto flex-1 w-full flex flex-col gap-2 px-1">
-                  {data.IncidentActivity!.map((inc) => {
-                    const messageDate = new Date(inc.message_date);
-                    return (
-                      <div
-                        className="w-full flex flex-col text-right overflow-hidden"
-                        key={inc.message_date}
-                      >
-                        <div className="flex flex-row-reverse gap-2 items-center">
-                          <div className="child:text-sm min-w-6 size-6 bg-secondary-yellow rounded-full flex child:text-white-color items-center justify-center">
-                            <span>
-                              {inc.sent_by.last_name.charAt(0).toUpperCase()}
-                            </span>
-                            <span>
-                              {inc.sent_by.first_name.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="font-medium flex gap-1" dir="rtl">
-                            <h5>
-                              {inc.sent_by.first_name +
-                                " " +
-                                inc.sent_by.last_name}
-                            </h5>
-
-                            <h5 className="text-secondary-text mx-2 font-normal">
-                              {messageDate.toLocaleString("he-IL", {
-                                day: "numeric",
-                                month: "short",
-                                year: "2-digit",
-                                hour: "numeric",
-                                minute: "numeric",
-                                second: "numeric",
-                              })}
-                            </h5>
-                          </div>
-                        </div>
-                        <p
-                          className="border-r-2 border-border m-3 px-3 whitespace-normal break-words max-w-[30rem] text-right self-end"
-                          dir="rtl"
-                        >
-                          {inc.message}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-                {/* New message section */}
-                <form
-                  onSubmit={handleSendMessage}
-                  className="bg-white-color border border-border rounded-md p-2 flex flex-row-reverse w-full"
-                >
-                  <textarea
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && e.shiftKey === false)
-                        handleSendMessage(e);
-                    }}
-                    dir="rtl"
-                    placeholder="הוסף עדכון.."
-                    className="resize-none flex-1 outline-none pl-2"
-                    rows={3}
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                  ></textarea>
-                  <button
-                    type="submit"
-                    className="px-2 py-1 bg-primary text-white rounded-md h-fit flex gap-2 items-center self-end flex-row-reverse"
-                  >
-                    שליחת עדכון
-                    <img src={messageIcon} />
-                  </button>
-                </form>
-              </div>
-            </div>
           </div>
         </motion.div>
       </div>

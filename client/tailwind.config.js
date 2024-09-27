@@ -7,7 +7,7 @@ module.exports = {
         text: "#1A1A1B",
         "secondary-text": "#606876",
         border: "#E4E5E9",
-        light: "#F4F4F4",
+        light: "#F7F8F9",
         "white-color": "#fff",
         "primary-hover": "#0061DE",
         primary: "#006FFF",

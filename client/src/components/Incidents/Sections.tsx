@@ -1,8 +1,8 @@
-import { AppType } from "../../../types/AppType";
-import { Dropdown } from "../../Dropdown";
-import chevronDown from "../../../assets/chevronDownIcon.svg";
+import { AppType } from "../../types/AppType";
+import { Dropdown } from "../Dropdown";
+import chevronDown from "../../assets/chevronDownIcon.svg";
 import { useState } from "react";
-import searchIcon from "../../../assets/searchIcon.svg";
+import searchIcon from "../../assets/searchIcon.svg";
 
 /**
  * A reusable dropdown component with a label, and a button which opens the dropdown menu.
@@ -184,7 +184,8 @@ export function LabelApps({
                   .filter((app) => app.name.includes(search))
                   .map((app) => {
                     return (
-                      <p
+                      <button
+                        type="button"
                         onClick={() => setValue(app)}
                         key={app.id}
                         className={`${
@@ -194,7 +195,7 @@ export function LabelApps({
                         } rounded-md  hover:bg-border p-2 text-right  cursor-pointer h-fit border box-border`}
                       >
                         {app.name}
-                      </p>
+                      </button>
                     );
                   })}
               </div>
@@ -221,12 +222,14 @@ export function LabelInput({
   placeholder = "",
   value,
   setValue,
+  isDisabled = false,
 }: {
   label: string;
   type?: string;
   placeholder?: string;
   value: string | null | Date;
   setValue: (e: any) => void;
+  isDisabled?: boolean;
 }) {
   const inputValue =
     value instanceof Date
@@ -249,6 +252,7 @@ export function LabelInput({
       </label>
       {type !== "textarea" ? (
         <input
+          disabled={isDisabled}
           dir="rtl"
           id={label}
           type={type}
@@ -268,6 +272,35 @@ export function LabelInput({
           rows={3}
         />
       )}
+    </div>
+  );
+}
+
+export function ToggleInput({
+  label,
+  value,
+  setValue,
+}: {
+  label: string;
+  value: boolean;
+  setValue: (e: any) => void;
+}) {
+  return (
+    <div className="form-text-div flex-1">
+      <label dir="rtl" className="font-medium text-sm mr-1" htmlFor={label}>
+        {label}
+      </label>
+      <div
+        onClick={() => setValue(!value)}
+        className="p-1 rounded-md bg-border flex child:px-4 child:py-1 child:rounded-md child:cursor-pointer child:flex-1 w-full text-center"
+      >
+        <h1 className={value ? "bg-white text-text" : "text-secondary-text"}>
+          כן
+        </h1>
+        <h1 className={!value ? "bg-white text-text" : "text-secondary-text"}>
+          לא
+        </h1>
+      </div>
     </div>
   );
 }

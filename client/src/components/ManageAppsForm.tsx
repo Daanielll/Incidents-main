@@ -4,14 +4,19 @@ import { useState } from "react";
 import trashIcon from "../assets/trashIcon.svg";
 import settings from "../types/AppSettings";
 import { ConfirmationModal } from "./ConfirmationModal";
-import { AppType } from "../types/AppType";
+import { AppType } from "../types/AppType.ts";
 import { Backdrop } from "./Backdrop";
 import { useEditApp } from "../hooks/Apps/useEditApp";
 import { useDeleteApp } from "../hooks/Apps/useDeleteApp";
 import { useNewApp } from "../hooks/Apps/useNewApp";
 import { toast } from "sonner";
-import { envEnum, PlatformEnum, SiteEnum } from "../types/IncidentType";
-import { LabelButton } from "./Incidents/incidentForm/Sections";
+import { LabelButton } from "./Incidents/Sections";
+import {
+  EnvEnum,
+  PlatformEnum,
+  RecoveryEnum,
+  SiteEnum,
+} from "../types/Enums.ts";
 
 /**
  * A form component to Add / Edit / Delete an app.
@@ -155,7 +160,7 @@ export function ManageAppsForm({
               label="סביבה"
               openDropDown={openDropDown}
               setOpenDropDown={setOpenDropDown}
-              setType={(value: keyof typeof envEnum) =>
+              setType={(value: keyof typeof EnvEnum | null | undefined) =>
                 setFormData({ ...formData, env: value })
               }
               type={formData.env}
@@ -198,7 +203,7 @@ export function ManageAppsForm({
           {/* Platform dropdown */}
           <LabelButton
             label="פלטפורמה"
-            values={settings.paltformSettings}
+            values={settings.platformSettings}
             type={formData.platform}
             setType={(value: keyof typeof PlatformEnum) =>
               setFormData({ ...formData, platform: value })
@@ -226,7 +231,7 @@ export function ManageAppsForm({
             label="שרידות"
             values={settings.recoverySettings}
             type={formData.recovery}
-            setType={(value: string) =>
+            setType={(value: keyof typeof RecoveryEnum) =>
               setFormData({ ...formData, recovery: value })
             }
             openDropDown={openDropDown}

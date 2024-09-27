@@ -11,9 +11,6 @@ const createIncident = async (req, res) => {
     !params.description ||
     !params.technical_impact ||
     !params.operational_impact ||
-    !params.platform ||
-    !params.env ||
-    !params.site ||
     !params.reported_by ||
     !apps ||
     apps.length === 0
@@ -21,6 +18,10 @@ const createIncident = async (req, res) => {
     return res.status(400).json({ error: "שדות חובה חסרים" });
 
   try {
+    const firstApp = await prisma.app.findUnique({
+      where: { id: apps[0] },
+      select: { main_site: true, env: true, platform: true },
+    });
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true },
@@ -29,7 +30,13 @@ const createIncident = async (req, res) => {
 
     const result = await prisma.$transaction(async (tx) => {
       const incident = await tx.incident.create({
-        data: { ...params, opened_by_id: userId },
+        data: {
+          ...params,
+          opened_by_id: userId,
+          site: firstApp.main_site,
+          platform: firstApp.platform,
+          env: firstApp.env,
+        },
       });
       for (let appId of apps) {
         await tx.incidentApp.create({
@@ -52,7 +59,6 @@ const createIncident = async (req, res) => {
 
       return { incident };
     });
-
     return res.status(201).json(result);
   } catch (error) {
     console.log(error);
@@ -212,46 +218,9 @@ const getIncidentById = async (req, res) => {
         IncidentApp: { select: { app: true, appId: true } },
         IncidentImpact: { select: { app: true } },
         opened_by: { select: { first_name: true, last_name: true } },
-        IncidentActivity: {
-          select: {
-            sent_by: { select: { first_name: true, last_name: true } },
-            message: true,
-            message_date: true,
-          },
-        },
       },
     });
     return res.status(200).json(incident);
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-const createIncidentComment = async (req, res) => {
-  const incId = Number(req.params.incId);
-  const userId = req.user.id;
-  const message = req.body.message;
-  if (!message || !incId || !userId)
-    return res.status(400).json({ error: "שדות חובה חסרים" });
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { first_name: true, last_name: true },
-    });
-    if (!user)
-      return res.status(404).json({ error: "Cant find a user with this ID" });
-    const incidentId = await prisma.incident.findUnique({
-      where: { id: incId },
-      select: { id: true },
-    });
-    if (!incidentId)
-      return res.status(404).json({ error: "לא קיים אירוע עם המזהה הזה" });
-    const result = await prisma.incidentActivity.create({
-      data: { message, userId, incidentId: incId },
-    });
-    return res.status(201).json(result);
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal server error" });
@@ -273,7 +242,6 @@ module.exports = {
   createIncident,
   getAllIncidents,
   getIncidentById,
-  createIncidentComment,
   deleteIncident,
   updateIncident,
 };

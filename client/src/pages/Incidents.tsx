@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import IncidentsTable from "../components/Incidents/IncidentsTable";
 import { useIncidentData } from "../hooks/useIncidentData";
 import { Outlet, useSearchParams } from "react-router-dom";
-import ManageIncidentForm from "../components/Incidents/incidentForm/ManageIncidentForm";
+import ManageIncidentForm from "../components/Incidents/ManageIncidentForm";
 import { AnimatePresence } from "framer-motion";
-import { ImpactEnum, StatusEnum } from "../types/IncidentType";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { useDebounce } from "../hooks/useDebounce";
 import searchIcon from "../assets/searchIcon.svg";
+import { ImpactEnum, StatusEnum } from "../types/Enums";
 
 /**
  * Fetches incidents data, which is then passed to the IncidentTable component to render the table.
@@ -76,7 +76,7 @@ export default function Incidents() {
                   : props.getValue() === "RESOLVED"
                   ? statusColor.green
                   : statusColor.yellow
-              } bg-opacity-15 rounded-md px-2 py-1 h-fit w-fit mx-auto`}
+              } bg-opacity-15 rounded-md px-2 py-1 h-fit w-fit mx-auto brightness-95`}
             >
               {StatusEnum[props.getValue() as keyof typeof StatusEnum]}
             </h1>
@@ -84,26 +84,7 @@ export default function Incidents() {
         );
       },
     },
-    {
-      accessorKey: "end_date",
-      header: "זיכוי אירוע",
-      cell: (props: any) => {
-        if (!props.getValue())
-          return <p className="text-secondary-text">בתהליך</p>;
-        return (
-          <h1 dir="rtl">
-            {props.getValue().toLocaleDateString("he-IL", {
-              day: "numeric",
-              month: "short",
-              ...(props.getValue().getFullYear() !== 2024
-                ? { year: "2-digit" }
-                : {}),
-            })}
-            <div></div>
-          </h1>
-        );
-      },
-    },
+
     {
       accessorKey: "start_date",
       header: "תחילת אירוע",
@@ -122,34 +103,6 @@ export default function Incidents() {
       },
     },
 
-    {
-      accessorKey: "IncidentImpact",
-      cell: (props: any) => {
-        if (props.getValue().length < 1) return <p>אין</p>;
-        return (
-          <div className="flex gap-2 w-full justify-center flex-row-reverse">
-            {props.getValue().map((app: any, index: number) => {
-              if (index > 2) return;
-              if (index === 2)
-                return (
-                  <p key="ellipsis" className="px-2 py-1 bg-light rounded-md">
-                    ...
-                  </p>
-                );
-              return (
-                <h1
-                  className="px-2 py-1 bg-light rounded-md"
-                  key={app.app.name}
-                >
-                  {app.app.name}
-                </h1>
-              );
-            })}
-          </div>
-        );
-      },
-      header: "מערכות מושפעות",
-    },
     {
       accessorKey: "IncidentApp",
       cell: (props: any) => (

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -12,7 +13,8 @@ const authUser = async (req, res) => {
     if (!user) return res.status(400).json({ error: "משתמש לא קיים" });
 
     // Check if user's password matches (not using encrypted passwords)
-    const isPasswordValid = password == user.password;
+    // const isPasswordValid = password == user.password;
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) return res.status(401).json({ error: "סיסמה שגויה" });
 
