@@ -1,6 +1,7 @@
 import { flexRender } from "@tanstack/react-table";
-import { useLocation, useNavigate } from "react-router-dom";
 import { IncidentType } from "../../types/IncidentType";
+import { useState } from "react";
+import IncidentDetails from "./IncidentDetails";
 
 /**
  * Renders a table with all the incidents.
@@ -16,8 +17,7 @@ export default function IncidentsTable({
   table: any;
   data: IncidentType[];
 }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [openedIncident, setOpenedIncident] = useState<number[]>([]);
 
   return (
     <table className="w-full text-text">
@@ -33,25 +33,47 @@ export default function IncidentsTable({
 
       <tbody>
         {table.getCoreRowModel().rows.map((row: any) => (
-          <tr
-            className="cursor-pointer hover:bg-[#F9F9F9]"
-            onClick={() => {
-              const queryParams = new URLSearchParams(location.search);
-              navigate(
-                `/incidents/${data[row.id].id}?${queryParams.toString()}`
-              );
-            }}
-            key={row.id}
-          >
-            {row.getVisibleCells().map((cell: any) => (
-              <td
-                key={cell.id}
-                className={"text-center px-3 py-4 border-b border-border"}
-              >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-          </tr>
+          <>
+            <tr
+              className={`${
+                openedIncident.includes(data[row.id].id!)
+                  ? "bg-light"
+                  : "bg-white-color"
+              } cursor-pointer hover:bg-light`}
+              // onClick={() => setOpenedIncident(data[row.id].id || 0)}
+              onClick={() => {
+                const correntId = data[row.id].id;
+                setOpenedIncident((prev) => {
+                  if (correntId === undefined) return [...prev];
+                  if (prev.includes(correntId)) {
+                    return prev.filter((i) => i !== correntId);
+                  } else {
+                    return [...prev, correntId]; // Create a new array with the new id added
+                  }
+                });
+              }}
+              key={row.id}
+            >
+              {row.getVisibleCells().map((cell: any) => (
+                <td
+                  key={cell.id}
+                  className={"text-center px-3 py-4 border-b border-border"}
+                >
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+            {openedIncident.includes(data[row.id].id!) && (
+              <tr>
+                <td
+                  colSpan={row.getVisibleCells().length}
+                  className="w-full h-64"
+                >
+                  <IncidentDetails id={data[row.id].id!} />
+                </td>
+              </tr>
+            )}
+          </>
         ))}
       </tbody>
     </table>

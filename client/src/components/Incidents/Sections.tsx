@@ -120,7 +120,7 @@ export function LabelApps({
   return (
     <div
       onClick={(e) => e.stopPropagation()}
-      className="flex flex-col items-end gap-1 w-full relative"
+      className="flex flex-col items-end gap-1 w-full relative h-[4.125rem]"
     >
       <h4 dir="rtl" className="font-medium text-sm mr-1">
         {label}
@@ -223,6 +223,7 @@ export function LabelInput({
   value,
   setValue,
   isDisabled = false,
+  long = false,
 }: {
   label: string;
   type?: string;
@@ -230,6 +231,7 @@ export function LabelInput({
   value: string | null | Date;
   setValue: (e: any) => void;
   isDisabled?: boolean;
+  long?: boolean;
 }) {
   const inputValue =
     value instanceof Date
@@ -259,7 +261,7 @@ export function LabelInput({
           value={inputValue}
           onChange={setValue}
           placeholder={placeholder}
-          className="input-default w-full"
+          className="input-default w-full h-[2.625rem]"
         />
       ) : (
         <textarea
@@ -268,7 +270,9 @@ export function LabelInput({
           value={typeof value === "string" ? value : ""}
           onChange={setValue}
           placeholder={placeholder}
-          className="input-default w-full resize-none"
+          className={`${
+            long ? "h-[10.375rem]" : ""
+          } input-default w-full resize-none `}
           rows={3}
         />
       )}
@@ -292,7 +296,7 @@ export function ToggleInput({
       </label>
       <div
         onClick={() => setValue(!value)}
-        className="p-1 rounded-md bg-border flex child:px-4 child:py-1 child:rounded-md child:cursor-pointer child:flex-1 w-full text-center"
+        className="p-1 rounded-md bg-border flex child:px-4 child:py-1 child:rounded-md child:cursor-pointer child:flex-1 w-full text-center h-[2.625rem]"
       >
         <h1 className={value ? "bg-white text-text" : "text-secondary-text"}>
           כן

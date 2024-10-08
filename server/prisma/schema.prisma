@@ -25,6 +25,7 @@ model Incident {
   status             IncidentStatus
   opened_by          User?           @relation(name: "OpenedIncident", fields: [opened_by_id], references: [id], onDelete: SetNull)
   updated_at         DateTime        @updatedAt
+  updated_by         User?           @relation(name: "UpdatedIncidents", fields: [updated_by_id], references: [id], onDelete: SetNull)
   platform           Platform?
   env                Env?
   site               Site?
@@ -35,6 +36,7 @@ model Incident {
   opened_by_id   Int?
   IncidentApp    IncidentApp[]
   IncidentImpact IncidentImpact[]
+  updated_by_id  Int?
 }
 
 model User {
@@ -44,6 +46,7 @@ model User {
   role            UserRole   @default(HAMAL)
   password        String
   IncidentsOpened Incident[] @relation("OpenedIncident")
+  IncidentUpdated Incident[] @relation("UpdatedIncidents")
 }
 
 model App {

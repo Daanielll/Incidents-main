@@ -128,6 +128,16 @@ export default function Incidents() {
     {
       accessorKey: "operational_impact",
       header: "משמעות מבצעית",
+      cell: (props: any) => {
+        return (
+          <p
+            dir="rtl"
+            className="max-w-64 overflow-hidden text-ellipsis whitespace-nowrap m-auto"
+          >
+            {props.getValue()}
+          </p>
+        );
+      },
     },
     {
       accessorKey: "technical_impact",

@@ -29,6 +29,7 @@ export function useIncidentDataById(incId: number) {
       );
       data.start_date = new Date(data.start_date);
       data.end_date = data.end_date ? new Date(data.end_date) : null;
+      data.updated_at = new Date(data.updated_at);
       return data;
     },
   });

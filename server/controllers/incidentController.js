@@ -36,6 +36,7 @@ const createIncident = async (req, res) => {
           site: firstApp.main_site,
           platform: firstApp.platform,
           env: firstApp.env,
+          updated_by_id: userId,
         },
       });
       for (let appId of apps) {
@@ -117,7 +118,7 @@ const updateIncident = async (req, res) => {
       // first update the incident itself
       const incident = await tx.incident.update({
         where: { id },
-        data: { ...params },
+        data: { ...params, updated_by_id: userId },
       });
 
       // delete all apps from the appsToDelete array and then create new new ones
@@ -210,7 +211,7 @@ const getAllIncidents = async (req, res) => {
 
 const getIncidentById = async (req, res) => {
   const incId = Number(req.params.incId);
-  if (!incId) return req.status(400).json({ error: "מזהה אירוע חסר" });
+  if (!incId) return res.status(400).json({ error: "מזהה אירוע חסר" });
   try {
     const incident = await prisma.incident.findUnique({
       where: { id: incId },
@@ -218,6 +219,7 @@ const getIncidentById = async (req, res) => {
         IncidentApp: { select: { app: true, appId: true } },
         IncidentImpact: { select: { app: true } },
         opened_by: { select: { first_name: true, last_name: true } },
+        updated_by: true,
       },
     });
     return res.status(200).json(incident);

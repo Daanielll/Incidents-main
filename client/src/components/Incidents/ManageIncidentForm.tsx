@@ -76,7 +76,6 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
       IncidentImpact,
       description,
       operational_impact,
-      IncidentActivity,
       ...data
     } = formData;
     // Create the finalIncident object, which will be sent to the server
@@ -181,6 +180,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                 setValue={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
+                long={!!incident.id}
               />
               <LabelApps
                 label="מערכות *"
@@ -214,18 +214,6 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
               />
               {incident.id && (
                 <>
-                  <LabelButton
-                    label="סביבה"
-                    values={settings.envSettings}
-                    openDropDown={openDropdown}
-                    setOpenDropDown={setOpenDropDown}
-                    type={formData.env}
-                    setType={(value: keyof typeof EnvEnum) => {
-                      setFormData({ ...formData, env: value });
-                    }}
-                    dropDownValue="env"
-                  />
-
                   <LabelButton
                     label="אתר"
                     values={settings.siteSettings}
@@ -318,17 +306,30 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                 dropDownValue="reporter"
               />
               {incident.id && (
-                <LabelButton
-                  label="תשתית"
-                  values={settings.platformSettings}
-                  openDropDown={openDropdown}
-                  setOpenDropDown={setOpenDropDown}
-                  type={formData.platform}
-                  setType={(value: keyof typeof PlatformEnum) => {
-                    setFormData({ ...formData, platform: value });
-                  }}
-                  dropDownValue="platform"
-                />
+                <>
+                  <LabelButton
+                    label="תשתית"
+                    values={settings.platformSettings}
+                    openDropDown={openDropdown}
+                    setOpenDropDown={setOpenDropDown}
+                    type={formData.platform}
+                    setType={(value: keyof typeof PlatformEnum) => {
+                      setFormData({ ...formData, platform: value });
+                    }}
+                    dropDownValue="platform"
+                  />
+                  <LabelButton
+                    label="סביבה"
+                    values={settings.envSettings}
+                    openDropDown={openDropdown}
+                    setOpenDropDown={setOpenDropDown}
+                    type={formData.env}
+                    setType={(value: keyof typeof EnvEnum) => {
+                      setFormData({ ...formData, env: value });
+                    }}
+                    dropDownValue="env"
+                  />
+                </>
               )}
               <LabelInput
                 label="זמן תחילת אירוע *"

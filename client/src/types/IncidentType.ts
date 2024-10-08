@@ -18,13 +18,10 @@ export interface IncidentType {
   end_date?: Date | null;
   status: keyof typeof StatusEnum | null;
   opened_by?: { first_name: string; last_name: string };
+  updated_at?: Date;
+  updated_by?: { first_name: string; last_name: string };
   IncidentApp: { app: AppType }[];
   IncidentImpact: { app: AppType }[];
-  IncidentActivity?: {
-    message: string;
-    message_date: string;
-    sent_by: { first_name: string; last_name: string };
-  }[];
   env?: keyof typeof EnvEnum | null;
   id?: number;
   omer_sent: boolean;
@@ -33,5 +30,4 @@ export interface IncidentType {
   reported_by: keyof typeof ReporterEnum | null;
   site?: keyof typeof SiteEnum | null;
   snow_ticket?: string;
-  jira_ticket?: string;
 }
