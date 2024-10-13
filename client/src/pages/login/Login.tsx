@@ -2,7 +2,7 @@ import { useState } from "react";
 import userIcon from "../assets/userIcon.svg";
 import lockIcon from "../assets/lockIcon.svg";
 import { Navigate } from "react-router-dom";
-import { useAuthContext } from "../hooks/Auth/useAuthContext";
+import { useAuthContext } from "../../hooks/Auth/useAuthContext";
 /**
  * Login component.
  * Renders a login form and handles user login.
