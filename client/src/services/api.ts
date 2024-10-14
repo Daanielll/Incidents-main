@@ -71,7 +71,7 @@ const editIncident = async ({
   changes,
   id,
 }: {
-  changes: Partial<IncidentType>;
+  changes: Object;
   id: number;
 }) => {
   const { data } = await apiClient.patch(`/incidents/${id}`, changes, {
@@ -80,7 +80,7 @@ const editIncident = async ({
   return data;
 };
 
-const createIncident = async (incident: IncidentType) => {
+const createIncident = async (incident: Object) => {
   const { data } = await apiClient.post("/incidents", incident, {
     withCredentials: true,
   });

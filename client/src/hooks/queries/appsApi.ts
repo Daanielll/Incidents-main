@@ -24,6 +24,8 @@ function useAllApps(): UseQueryResult<AppType[]> {
 
 // Hook to delete an app
 function useDeleteApp() {
+  const toastAndInvalidate = useToastAndInvalidate();
+
   const { mutateAsync } = useMutation({
     mutationFn: deleteApp,
     onError: handleError,
@@ -34,6 +36,7 @@ function useDeleteApp() {
 
 // Hook to edit an app
 function useEditApp() {
+  const toastAndInvalidate = useToastAndInvalidate();
   const { mutateAsync } = useMutation({
     mutationFn: editApp,
     onError: handleError,
@@ -44,6 +47,7 @@ function useEditApp() {
 
 // Hook to create an app
 function useNewApp() {
+  const toastAndInvalidate = useToastAndInvalidate();
   const { mutateAsync } = useMutation({
     mutationFn: createApp,
     onError: handleError,
@@ -53,14 +57,15 @@ function useNewApp() {
 }
 
 // Function to toast and invalidate queries on success
-function toastAndInvalidate(text: String) {
+function useToastAndInvalidate() {
   const queryClient = useQueryClient();
-
-  queryClient.invalidateQueries({ queryKey: ["allApps"] });
-  toast.success(text, {
-    position: "top-center",
-    className: "toast-rtl",
-  });
+  return (text: string) => {
+    queryClient.invalidateQueries({ queryKey: ["allApps"] });
+    toast.success(text, {
+      position: "top-center",
+      className: "toast-rtl",
+    });
+  };
 }
 
 export { useAllApps, useDeleteApp, useEditApp, useNewApp };
