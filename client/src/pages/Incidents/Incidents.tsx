@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import IncidentsTable from "../components/Incidents/IncidentsTable";
-import { useIncidentData } from "../hooks/useIncidentData";
+
 import { Outlet, useSearchParams } from "react-router-dom";
-import ManageIncidentForm from "../components/Incidents/ManageIncidentForm";
 import { AnimatePresence } from "framer-motion";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
-import { useDebounce } from "../hooks/useDebounce";
 import searchIcon from "../assets/searchIcon.svg";
-import { ImpactEnum, StatusEnum } from "../types/Enums";
+import { useDebounce } from "../../hooks/useDebounce";
+import { useIncidentData } from "../../hooks/useIncidentData";
+import { ImpactEnum, StatusEnum } from "../../types/Enums";
+import IncidentsTable from "./components/IncidentsTable";
+import ManageIncidentForm from "./components/ManageIncidentForm";
 
 /**
  * Fetches incidents data, which is then passed to the IncidentTable component to render the table.

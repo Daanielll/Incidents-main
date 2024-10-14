@@ -40,28 +40,52 @@ model Incident {
 }
 
 model User {
-  id              Int        @id
-  first_name      String
-  last_name       String
-  role            UserRole   @default(HAMAL)
+  id              Int           @id
+  name            String
+  role            UserRole      @default(HAMAL)
   password        String
-  IncidentsOpened Incident[] @relation("OpenedIncident")
-  IncidentUpdated Incident[] @relation("UpdatedIncidents")
+  incidentsOpened Incident[]    @relation("OpenedIncident")
+  incidentUpdated Incident[]    @relation("UpdatedIncidents")
+  appsManaged     AppManagers[]
 }
 
 model App {
-  id                 Int              @id @default(autoincrement())
-  name               String
-  description        String?
-  operational_impact String?
-  bcp_duration       Int?
-  bcp_latest         DateTime?
-  env                Env?
-  main_site          Site?
-  recovery           Recovery?
-  platform           Platform?
-  IncidentApps       IncidentApp[]
-  ImpactedApps       IncidentImpact[]
+  id                Int              @id @default(autoincrement())
+  name              String
+  url               String?
+  description       String
+  operationalImpact String
+  branch            String
+  section           String
+  alternative       String?
+  severity          Int
+  env               Env
+  site              Site
+  recovery          Recovery
+  platform          Platform
+  incidentApps      IncidentApp[]
+  impactedApps      IncidentImpact[]
+  appManagers       AppManagers[]
+  appBCP            AppBCP? // Optional relation to BCP
+}
+
+model AppManagers {
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  app    App  @relation(fields: [appId], references: [id], onDelete: Cascade)
+  userId Int
+  appId  Int
+
+  @@id([appId, userId])
+}
+
+model AppBCP {
+  appId         Int      @id
+  bcpDuration   Int
+  bcpLatest     DateTime
+  bcpComplexity Int
+  bcpDependence String?
+  bcpOther      String?
+  app           App      @relation(fields: [appId], references: [id], onDelete: Cascade)
 }
 
 model IncidentApp {
