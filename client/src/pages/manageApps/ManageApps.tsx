@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
-import { useAllApps } from "../../hooks/Apps/useAllApps";
 import { ManageAppsForm } from "./components/ManageAppsForm";
+import { useAllApps } from "hooks/queries/appsApi";
 
 /**
  * ManageApps component for managing apps.

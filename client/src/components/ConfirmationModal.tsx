@@ -1,5 +1,5 @@
 import { Backdrop } from "./Backdrop";
-import trashIcon from "../assets/cautionIcon.svg";
+import trashIcon from "assets/cautionIcon.svg";
 
 /**
  * Renders a modal with a title, text, and two buttons: submit and cancel.
@@ -8,7 +8,7 @@ import trashIcon from "../assets/cautionIcon.svg";
  * @param handleSubmit - The function to be triggered when the submit button is clicked.
  * @param handleClose - The function to be triggered when the cancel button or the backdrop is clicked.
  */
-export function ConfirmationModal({
+export const ConfirmationModal = ({
   title,
   text,
   handleSubmit,
@@ -18,7 +18,7 @@ export function ConfirmationModal({
   text: string;
   handleSubmit: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   handleClose: () => void;
-}) {
+}) => {
   return (
     // The backdrop component covers the entire parent component and triggers the handleClose function when clicked
     <Backdrop onClick={handleClose}>
@@ -55,4 +55,4 @@ export function ConfirmationModal({
       </div>
     </Backdrop>
   );
-}
+};

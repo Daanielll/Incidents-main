@@ -1,7 +1,7 @@
 import { flexRender } from "@tanstack/react-table";
 import { useState } from "react";
 import IncidentDetails from "./IncidentDetails";
-import { IncidentType } from "../../../types/IncidentType";
+import { IncidentType } from "types/IncidentType";
 
 /**
  * Renders a table with all the incidents.

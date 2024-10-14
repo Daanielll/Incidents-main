@@ -1,10 +1,8 @@
 import { AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
-import trashIcon from "../../assets/trashIcon.svg";
-import editIcon from "../../assets/editIcon.svg";
-import { useIncidentDataById } from "../../../hooks/useIncidentData";
-import { useDeleteIncident } from "../../../hooks/useDeleteIncident";
+import trashIcon from "assets/trashIcon.svg";
+import editIcon from "assets/editIcon.svg";
 import {
   EnvEnum,
   ImpactEnum,
@@ -12,10 +10,14 @@ import {
   ReporterEnum,
   SiteEnum,
   StatusEnum,
-} from "../../../types/Enums";
+} from "types/Enums";
 import ManageIncidentForm from "./ManageIncidentForm";
-import { ConfirmationModal } from "../../../components/ConfirmationModal";
-import { AppType } from "../../../types/AppType";
+import { ConfirmationModal } from "components/ConfirmationModal";
+import { AppType } from "types/AppType";
+import {
+  useDeleteIncident,
+  useIncidentDataById,
+} from "hooks/queries/incidentApi";
 
 /**
  * The IncidentDetails component renders the incident details page, including the incident's activity

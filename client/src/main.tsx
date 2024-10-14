@@ -1,20 +1,19 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
-import "./index.css";
+import "./styles/index.css";
 import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
 } from "react-router-dom";
-import { Login } from "./pages/Login.tsx";
 import { PrivateRoute } from "./components/PrivateRoute.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { UserContextProvider } from "./context/userContext.tsx";
 import { Toaster } from "sonner";
-import Incidents from "./pages/Incidents.tsx";
-import IncidentDetails from "./components/Incidents/IncidentDetails.tsx";
-import { ManageApps } from "./pages/ManageApps.tsx";
+import Incidents from "./pages/Incidents/Incidents.tsx";
+import { ManageApps } from "./pages/manageApps/ManageApps.tsx";
+import { Login } from "./pages/login/Login.tsx";
 
 const queryClient = new QueryClient();
 // const navigate = useNavigate();
@@ -35,12 +34,6 @@ const router = createBrowserRouter([
       {
         element: <Incidents />,
         path: "/incidents",
-        children: [
-          {
-            path: ":id",
-            element: <IncidentDetails />,
-          },
-        ],
       },
       {
         element: <ManageApps />,

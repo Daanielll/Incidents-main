@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { useAuthContext } from "../hooks/Auth/useAuthContext";
 import { NavLink } from "react-router-dom";
-import { IncidentIcon } from "../assets/IncidentIcon";
-import { ManageAppsIcon } from "../assets/ManageAppsIcon";
+import { IncidentIcon } from "assets/IncidentIcon";
+import { ManageAppsIcon } from "assets/ManageAppsIcon";
+import { useAuthContext } from "hooks/Auth/useAuthContext";
 
 /**
  * Sidebar component.
  * Renders a sidebar with the logo, a menu with one section for the hamal and one section for the commander, and user information.
  */
-export function Sidebar() {
+export const Sidebar = () => {
   // State to control the sidebar's expand/collapse state
   const [isExpanded, setIsExpanded] = useState(false);
   // Get the user object from the auth context
@@ -131,4 +131,4 @@ export function Sidebar() {
       </div>
     </>
   );
-}
+};

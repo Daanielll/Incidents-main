@@ -1,15 +1,13 @@
-import { IncidentType } from "../../types/IncidentType";
 import { motion } from "framer-motion";
-import { Backdrop } from "../Backdrop";
-import crossIcon from "../../assets/crossIcon.svg";
+import crossIcon from "assets/crossIcon.svg";
 import { useEffect, useState } from "react";
-import settings from "../../types/AppSettings";
 import { LabelApps, LabelButton, LabelInput, ToggleInput } from "./Sections";
-import { useNewIncident } from "../../hooks/useNewIncident";
+import { IncidentType } from "types/IncidentType";
+import { useAllApps } from "hooks/queries/appsApi";
+import { useNewIncident, useUpdateIncident } from "hooks/queries/incidentApi";
 import { toast } from "sonner";
-import { useAllApps } from "../../hooks/Apps/useAllApps";
-import { useUpdateIncident } from "../../hooks/useUpdateIncident";
-import { AppType } from "../../types/AppType";
+import { Backdrop } from "components/Backdrop";
+import AppSettings from "types/AppSettings";
 import {
   EnvEnum,
   ImpactEnum,
@@ -17,7 +15,8 @@ import {
   ReporterEnum,
   SiteEnum,
   StatusEnum,
-} from "../../types/Enums";
+} from "types/Enums";
+import { AppType } from "types/AppType";
 
 type Props = {
   handleClose: (e: React.MouseEvent | React.FormEvent) => void;
@@ -216,7 +215,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                 <>
                   <LabelButton
                     label="אתר"
-                    values={settings.siteSettings}
+                    values={AppSettings.siteSettings}
                     openDropDown={openDropdown}
                     setOpenDropDown={setOpenDropDown}
                     type={formData.site}
@@ -237,7 +236,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
               />
               <LabelButton
                 label="סטטוס *"
-                values={settings.statusSettings}
+                values={AppSettings.statusSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
                 type={formData.status}
@@ -285,7 +284,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
               />
               <LabelButton
                 label="משמעות טכנית *"
-                values={settings.impactSettings}
+                values={AppSettings.impactSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
                 type={formData.technical_impact}
@@ -296,7 +295,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
               />
               <LabelButton
                 label="מקור דיווח *"
-                values={settings.reporterSettings}
+                values={AppSettings.reporterSettings}
                 openDropDown={openDropdown}
                 setOpenDropDown={setOpenDropDown}
                 type={formData.reported_by}
@@ -309,7 +308,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                 <>
                   <LabelButton
                     label="תשתית"
-                    values={settings.platformSettings}
+                    values={AppSettings.platformSettings}
                     openDropDown={openDropdown}
                     setOpenDropDown={setOpenDropDown}
                     type={formData.platform}
@@ -320,7 +319,7 @@ export default function ManageIncidentForm({ handleClose, incident }: Props) {
                   />
                   <LabelButton
                     label="סביבה"
-                    values={settings.envSettings}
+                    values={AppSettings.envSettings}
                     openDropDown={openDropdown}
                     setOpenDropDown={setOpenDropDown}
                     type={formData.env}

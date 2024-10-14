@@ -1,6 +1,7 @@
 import axios from "axios";
 import { AppType } from "../types/AppType";
 import { IncidentType } from "../types/IncidentType";
+import { toast } from "sonner";
 
 const apiClient = axios.create({
   baseURL: "http://localhost:3500",
@@ -59,6 +60,45 @@ const fetchIncidentById = async (incId: number) => {
   return data;
 };
 
+const deleteIncident = async (id: number) => {
+  const { data } = await apiClient.delete(`incidents/${id}`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const editIncident = async ({
+  changes,
+  id,
+}: {
+  changes: Partial<IncidentType>;
+  id: number;
+}) => {
+  const { data } = await apiClient.patch(`/incidents/${id}`, changes, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const createIncident = async (incident: IncidentType) => {
+  const { data } = await apiClient.post("/incidents", incident, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+// Handle error toast
+const handleError = (error: Error) => {
+  {
+    if (error instanceof axios.AxiosError) {
+      toast.error(error.response?.data.error || error.message, {
+        position: "top-center",
+        richColors: true,
+        className: "toast-rtl",
+      });
+    }
+  }
+};
 export {
   fetchAllApps,
   deleteApp,
@@ -66,4 +106,8 @@ export {
   createApp,
   fetchAllIncidents,
   fetchIncidentById,
+  deleteIncident,
+  editIncident,
+  handleError,
+  createIncident,
 };

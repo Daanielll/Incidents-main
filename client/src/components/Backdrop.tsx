@@ -6,13 +6,13 @@ import { motion } from "framer-motion";
  * @param onClick - The click handler function
  * @returns The Backdrop component
  */
-export function Backdrop({
+export const Backdrop = ({
   children,
   onClick,
 }: {
   children: React.ReactNode;
   onClick: (e: React.MouseEvent) => void;
-}) {
+}) => {
   return (
     // Motion div component that creates a backdrop overlay
     <motion.div
@@ -33,4 +33,4 @@ export function Backdrop({
       {children}
     </motion.div>
   );
-}
+};

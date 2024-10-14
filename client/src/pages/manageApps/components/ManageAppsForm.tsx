@@ -1,22 +1,15 @@
 import { AnimatePresence, motion } from "framer-motion";
-import crossIcon from "../assets/crossIcon.svg";
+import crossIcon from "assets/crossIcon.svg";
 import { useState } from "react";
-import trashIcon from "../assets/trashIcon.svg";
-import settings from "../../../types/AppSettings.ts";
-import { ConfirmationModal } from "../../../components/ConfirmationModal.tsx";
-import { AppType } from "../../../types/AppType.ts";
-import { Backdrop } from "../../../components/Backdrop.tsx";
-import { useEditApp } from "../../../hooks/Apps/useEditApp.tsx";
-import { useDeleteApp } from "../../../hooks/Apps/useDeleteApp.tsx";
-import { useNewApp } from "../../../hooks/Apps/useNewApp.tsx";
+import trashIcon from "assets/trashIcon.svg";
+import settings from "types/AppSettings.ts";
+import { ConfirmationModal } from "components/ConfirmationModal.tsx";
+import { AppType } from "types/AppType.ts";
+import { Backdrop } from "components/Backdrop.tsx";
 import { toast } from "sonner";
-import {
-  EnvEnum,
-  PlatformEnum,
-  RecoveryEnum,
-  SiteEnum,
-} from "../../../types/Enums.ts";
-import { LabelButton } from "../../Incidents/components/Sections.tsx";
+import { EnvEnum, PlatformEnum, RecoveryEnum, SiteEnum } from "types/Enums.ts";
+import { useDeleteApp, useEditApp, useNewApp } from "hooks/queries/appsApi.ts";
+import { LabelButton } from "pages/Incidents/components/Sections";
 
 /**
  * A form component to Add / Edit / Delete an app.

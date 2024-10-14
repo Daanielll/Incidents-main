@@ -1,8 +1,8 @@
-import { AppType } from "../../types/AppType";
-import { Dropdown } from "../Dropdown";
-import chevronDown from "../../assets/chevronDownIcon.svg";
+import chevronDown from "assets/chevronDownIcon.svg";
 import { useState } from "react";
-import searchIcon from "../../assets/searchIcon.svg";
+import searchIcon from "assets/searchIcon.svg";
+import { Dropdown } from "components/Dropdown";
+import { AppType } from "types/AppType";
 
 /**
  * A reusable dropdown component with a label, and a button which opens the dropdown menu.

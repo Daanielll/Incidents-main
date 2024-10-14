@@ -4,7 +4,7 @@
  * @param data - The array of options to display in the dropdown
  * @param setValue - The function to update the selected value
  */
-export function Dropdown({
+export const Dropdown = ({
   data,
   setValue,
   handleClose,
@@ -12,7 +12,7 @@ export function Dropdown({
   data: { name: string; value: string | null }[];
   setValue: (e: any) => void;
   handleClose: () => void;
-}) {
+}) => {
   return (
     // The dropdown container
     <div className="absolute top-12 left-0 flex flex-col w-full py-1 items-end bg-white border border-border rounded-md overflow-hidden z-50 shadow-sm">
@@ -35,4 +35,4 @@ export function Dropdown({
       ))}
     </div>
   );
-}
+};
