@@ -16,17 +16,18 @@ import ManageIncidentForm from "pages/Incidents/components/ManageIncidentForm";
 
 export default function Incidents() {
   // Get search params and add the page and limit to a pagination state
-  const [searchParams, setSearchParms] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [pagination, setPagination] = useState({
     pageSize: Number(searchParams.get("limit")) || 10,
     pageIndex: Number(searchParams.get("page")) || 0,
   });
+
   // Get search query from the search params and create a debounced var for it
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const debouncedSearch = useDebounce(search);
   // Change the URL when pagination state change
   useEffect(() => {
-    setSearchParms({
+    setSearchParams({
       ...(pagination.pageSize !== 10 && {
         limit: pagination.pageSize.toString(),
       }),
@@ -44,7 +45,7 @@ export default function Incidents() {
       ...pagination,
       pageIndex: 0,
     });
-    setSearchParms({
+    setSearchParams({
       ...searchParams,
       ...(search !== "" && {
         search,

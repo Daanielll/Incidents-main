@@ -17,9 +17,9 @@ export interface IncidentType {
   start_date: Date;
   end_date?: Date | null;
   status: keyof typeof StatusEnum | null;
-  opened_by?: { first_name: string; last_name: string };
+  opened_by?: { name: string };
   updated_at?: Date;
-  updated_by?: { first_name: string; last_name: string };
+  updated_by?: { name: string };
   IncidentApp: { app: AppType }[];
   IncidentImpact: { app: AppType }[];
   env?: keyof typeof EnvEnum | null;

@@ -58,8 +58,7 @@ const getUser = async (req, res) => {
       where: { id: results.id },
       select: {
         id: true,
-        first_name: true,
-        last_name: true,
+        name: true,
         role: true,
       },
     });

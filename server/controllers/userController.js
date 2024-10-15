@@ -2,10 +2,10 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const prisma = new PrismaClient();
 const createUser = async (req, res) => {
-  const { id, first_name, last_name, password, role } = req.body;
+  const { id, name, password, role } = req.body;
 
   // Return if vars are invalid
-  if (!id || !first_name || !last_name || !password)
+  if (!id || !name || !password)
     return res.status(400).json({ error: "שדות חובה חסרים" });
 
   try {
@@ -18,7 +18,7 @@ const createUser = async (req, res) => {
     const encryptedPassword = await bcrypt.hash(password, 10);
     // Create user
     const user = await prisma.user.create({
-      data: { id, first_name, last_name, password: encryptedPassword, role },
+      data: { id, name, password: encryptedPassword, role },
     });
     return res.status(201).json(user);
   } catch (error) {

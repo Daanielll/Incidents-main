@@ -62,18 +62,12 @@ export default function IncidentDetails({ id }: { id: number }) {
           <div className="flex flex-col gap-2">
             <TextSection
               label="נפתח על ידי:"
-              text={`${
-                data.opened_by
-                  ? data.opened_by.first_name + " " + data.opened_by.last_name
-                  : "משתמש נמחק"
-              }`}
+              text={`${data.opened_by ? data.opened_by.name : "משתמש נמחק"}`}
             />
             <TextSection
               label="נערך על ידי:"
               text={`${
-                data.updated_by
-                  ? data.updated_by.first_name + " " + data.updated_by.last_name
-                  : "משתמש נמחק"
+                data.updated_by ? data.updated_by.name : "משתמש נמחק"
               } ב: ${data.updated_at!.toLocaleString("he-IL", {
                 day: "numeric",
                 month: "short",

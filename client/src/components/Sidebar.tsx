@@ -115,15 +115,16 @@ export const Sidebar = () => {
             isExpanded ? "bg-light border border-border -m-1 p-1" : ""
           } w-[calc(100%+0.5rem)] flex justify-start flex-row-reverse rounded-lg gap-4 py-2 items-center overflow-hidden`}
         >
-          <div className="min-w-10 size-10 bg-secondary-yellow rounded-full flex child:text-white-color items-center justify-center">
-            <span>{user.last_name.charAt(0).toUpperCase()}</span>
-            <span>{user.first_name.charAt(0).toUpperCase()}</span>
+          <div
+            dir="rtl"
+            className="min-w-10 size-10 bg-secondary-yellow rounded-full flex child:text-white-color items-center justify-center"
+          >
+            <span>{user.name.charAt(0).toUpperCase()}</span>
+            <span>{user.name.split(" ")[1].charAt(0).toUpperCase()}</span>
           </div>
           {isExpanded && (
             <div>
-              <h1 className="font-medium text-text">
-                {user.first_name + " " + user.last_name}
-              </h1>
+              <h1 className="font-medium text-text">{user.name}</h1>
               <h2 className="text-secondary-text">{user.id}</h2>
             </div>
           )}

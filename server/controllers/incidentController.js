@@ -218,7 +218,7 @@ const getIncidentById = async (req, res) => {
       include: {
         IncidentApp: { select: { app: true, appId: true } },
         IncidentImpact: { select: { app: true } },
-        opened_by: { select: { first_name: true, last_name: true } },
+        opened_by: { select: { name: true } },
         updated_by: true,
       },
     });
